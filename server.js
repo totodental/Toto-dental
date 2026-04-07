@@ -1,9 +1,20 @@
-const API = "https://toto-dental.onrender.com";
-
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 const express = require("express");
+
+const cors = require("cors");
+
+const app = express();  // 👈 ЭНЭ ДУТАЖ БАЙНА
+
+app.use(cors({
+  origin: [
+    "https://toto-dental.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 const { initDatabase } = require("./backend/database");
 
 function loadEnvFile() {
