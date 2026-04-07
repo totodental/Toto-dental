@@ -1,38 +1,48 @@
 # Toto Dental
 
-Static landing page for Toto Dental.
+Landing page plus appointment booking backend for Toto Dental.
 
-## Local preview
+## Local development
 
 ```powershell
 cd "C:\Users\1021019180\Documents\Code\Toto Dental"
-.\start-demo.bat
+node .\server.js
 ```
 
 Open `http://127.0.0.1:3000`.
 
-## Deploy to Vercel
+## Backend stack
 
-1. Push this folder to a GitHub repository.
-2. Import the repository into Vercel.
-3. Framework preset: `Other`.
-4. Root directory: project root.
-5. Build command: leave empty.
-6. Output directory: leave empty.
-7. Deploy.
+- Node.js + Express
+- SQLite via `better-sqlite3`
+- Static frontend served by the same Node app
 
-## Connect a domain
+Appointment data is stored in `data/app.db` and is created automatically on first run.
 
-1. Open the project in Vercel.
-2. Go to `Settings -> Domains`.
-3. Add your domain.
-4. Copy the DNS records Vercel shows.
-5. Add those records at your domain provider.
-6. Wait for SSL to become active.
+## Environment variables
+
+- `PORT`
+- `ADMIN_ROUTE_ID`
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD`
+- `SESSION_SECRET`
+
+## Production deployment
+
+Deploy this project to a Node host such as Railway, Render, Fly.io, or a VPS.
+
+1. Push this folder to a Git repository.
+2. Create the environment variables from `.env.example`.
+3. Set the start command to `node server.js`.
+4. Attach your custom domain.
+5. Enable HTTPS on the hosting platform.
 
 ## Files
 
 - `index.html` main page
 - `style.css` styles
-- `script.js` scroll reveal behavior
+- `script.js` patient booking UI
+- `server.js` API and static server
+- `backend/database.js` SQLite schema and seed data
+- `admin/` private reception dashboard
 - `assets/` images

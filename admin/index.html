@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests">
+  <title>Toto Dental Admin</title>
+  <link rel="icon" type="image/jpeg" href="../assets/logo.jpg">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="./admin.css">
+</head>
+<body class="admin-body">
+  <main class="admin-shell">
+    <section class="admin-gate" id="admin-gate">
+      <div class="admin-brand">
+        <img src="../assets/logo.jpg" alt="Toto Dental">
+        <div>
+          <p class="panel-kicker">Private Admin</p>
+          <h1>Toto Dental Reception</h1>
+        </div>
+      </div>
+
+      <div class="admin-panel login-panel" id="login-panel" hidden>
+        <div class="panel-head">
+          <div>
+            <p class="panel-kicker">Secure Login</p>
+            <h3>Reception нэвтрэх</h3>
+          </div>
+          <span class="panel-chip accent">Admin only</span>
+        </div>
+        <form id="admin-login-form" class="admin-login-form">
+          <label>
+            Нэвтрэх нэр
+            <input type="text" id="admin-username" autocomplete="username" required>
+          </label>
+          <label>
+            Нууц үг
+            <input type="password" id="admin-password" autocomplete="current-password" required>
+          </label>
+          <button class="primary-btn submit-btn" type="submit">Нэвтрэх</button>
+        </form>
+        <div class="admin-feedback" id="login-feedback">Зөв `id` query-тэй үед л login form нээгдэнэ.</div>
+      </div>
+
+      <div class="admin-panel denied-panel" id="denied-panel" hidden>
+        <p class="panel-kicker">Access Denied</p>
+        <h3>Нууц admin линк буруу байна</h3>
+        <p>Зөв `/admin?id=...` линкээр орж ирэх шаардлагатай.</p>
+      </div>
+
+      <div class="admin-workspace" id="admin-workspace" hidden>
+        <section class="admin-panel admin-overview">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Reception Console</p>
+              <h3>Хүсэлт ба хуваарь</h3>
+            </div>
+            <button class="ghost-btn" id="admin-logout" type="button">Гарах</button>
+          </div>
+
+          <div class="dashboard-stats">
+            <article class="mini-stat">
+              <strong id="pending-count">0</strong>
+              <span>Хүлээгдэж буй</span>
+            </article>
+            <article class="mini-stat">
+              <strong id="confirmed-count">0</strong>
+              <span>Баталгаажсан</span>
+            </article>
+            <article class="mini-stat">
+              <strong id="busy-count">0</strong>
+              <span>Завгүй эмч</span>
+            </article>
+          </div>
+        </section>
+
+        <section class="admin-grid">
+          <section class="admin-panel calendar-panel">
+            <div class="queue-head">
+              <div>
+                <p class="panel-kicker">Calendar View</p>
+                <h4 id="calendar-title">Захиалгын календарь</h4>
+              </div>
+              <div class="calendar-actions">
+                <button class="ghost-btn" id="calendar-prev" type="button">Өмнө</button>
+                <button class="ghost-btn" id="calendar-today" type="button">Өнөөдөр</button>
+                <button class="ghost-btn" id="calendar-next" type="button">Дараа</button>
+              </div>
+            </div>
+            <div class="admin-calendar">
+              <div class="calendar-weekdays">
+                <span>Ня</span>
+                <span>Да</span>
+                <span>Мя</span>
+                <span>Лх</span>
+                <span>Пү</span>
+                <span>Ба</span>
+                <span>Бя</span>
+              </div>
+              <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+            <div class="day-detail-panel" id="day-detail-panel">
+              <div class="queue-head">
+                <div>
+                  <p class="panel-kicker">Day Details</p>
+                  <h4 id="day-detail-title">Өдөр сонгоогүй байна</h4>
+                </div>
+              </div>
+              <div class="day-detail-list" id="day-detail-list">
+                <div class="empty-box">Календарь дээрх өдөр эсвэл `+N өөр` дээр дарж тухайн өдрийн бүх захиалгыг харна.</div>
+              </div>
+            </div>
+          </section>
+
+          <section class="admin-panel">
+            <div class="queue-head">
+              <div>
+                <h4>Ирсэн хүсэлтүүд</h4>
+                <p class="admin-subtle">Card дээрх “Өөрчлөх” эсвэл календарь дээрх event дээр дарж workspace form-д нээнэ.</p>
+              </div>
+              <div class="calendar-actions">
+                <button class="ghost-btn" id="admin-create-appointment" type="button">Шинэ цаг</button>
+                <button class="ghost-btn" id="clear-requests" type="button">Хүсэлт цэвэрлэх</button>
+              </div>
+            </div>
+            <div class="request-list" id="request-list"></div>
+          </section>
+
+          <section class="admin-panel editor-panel">
+            <div class="queue-head">
+              <div>
+                <h4>Цагийн workspace</h4>
+                <p class="admin-subtle">Шинээр нэмэх, засах, confirmed болгох, эсвэл календарь дээрээс өдөр рүү нь чирж өөрчилнө.</p>
+              </div>
+              <div class="calendar-actions">
+                <button class="ghost-btn" id="editor-reset" type="button">Цэвэрлэх</button>
+              </div>
+            </div>
+            <form id="appointment-editor-form" class="admin-editor-form">
+              <input type="hidden" id="editor-appointment-id">
+              <label>
+                Өвчтөний нэр
+                <input type="text" id="editor-patient-name" required>
+              </label>
+              <label>
+                Утас
+                <input type="text" id="editor-phone" required>
+              </label>
+              <label>
+                Эмч
+                <select id="editor-doctor" required></select>
+              </label>
+              <label>
+                Салбар
+                <select id="editor-branch" required>
+                  <option value="Салбар 1">Салбар 1</option>
+                  <option value="Салбар 2">Салбар 2</option>
+                </select>
+              </label>
+              <label>
+                Өдөр
+                <input type="date" id="editor-date" required>
+              </label>
+              <label>
+                Цаг
+                <input type="time" id="editor-time" required>
+              </label>
+              <label>
+                Төлөв
+                <select id="editor-status" required>
+                  <option value="pending">Хүлээгдэж буй</option>
+                  <option value="confirmed">Баталгаажсан</option>
+                  <option value="cancelled">Цуцалсан</option>
+                  <option value="completed">Дууссан</option>
+                </select>
+              </label>
+              <label class="full">
+                Тайлбар
+                <textarea id="editor-notes" rows="4"></textarea>
+              </label>
+              <div class="editor-actions full">
+                <button class="primary-btn submit-btn" id="editor-save" type="submit">Хадгалах</button>
+                <button class="ghost-btn" id="editor-confirm" type="button">Confirmed болгох</button>
+                <button class="ghost-btn" id="editor-delete" type="button">Устгах</button>
+              </div>
+            </form>
+            <div class="admin-feedback" id="editor-feedback">Календарь дээрх захиалгыг чирээд өөр өдөр рүү зөөж болно. Цагийн өөрчлөлтийг энэ form дээрээс удирдана.</div>
+          </section>
+
+          <section class="admin-panel">
+            <div class="queue-head">
+              <h4>Эмчийн төлөв солих</h4>
+            </div>
+            <div class="status-controls" id="status-controls"></div>
+          </section>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="./admin.js"></script>
+</body>
+</html>

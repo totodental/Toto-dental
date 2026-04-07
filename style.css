@@ -383,6 +383,362 @@ a {
   padding-bottom: 90px;
 }
 
+.booking-layout {
+  display: block;
+}
+
+.booking-panel,
+.doctor-card,
+.doctor-status-card,
+.status-card,
+.request-card,
+.mini-stat {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(12px);
+}
+
+.booking-stack,
+.booking-guide {
+  display: grid;
+  gap: 18px;
+}
+
+.booking-panel {
+  padding: 22px;
+}
+
+.panel-head,
+.queue-head,
+.request-actions,
+.dashboard-stats,
+.status-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.doctor-top,
+.doctor-meta,
+.request-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.panel-head,
+.queue-head {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-kicker {
+  margin: 0 0 6px;
+  color: var(--brand);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.panel-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(11, 142, 207, 0.12);
+  color: var(--brand-deep);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.panel-chip.accent {
+  background: rgba(244, 189, 86, 0.22);
+  color: #8a5a00;
+}
+
+.patient-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.scheduler-shell {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(11, 74, 120, 0.04), rgba(255, 255, 255, 0.9));
+  border: 1px solid var(--line);
+}
+
+.scheduler-toolbar,
+.scheduler-legend,
+.selected-meta,
+.slot-head,
+.slot-times {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.scheduler-toolbar,
+.slot-head {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scheduler-picker {
+  display: grid;
+  gap: 8px;
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.scheduler-picker select {
+  min-width: 240px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(11, 74, 120, 0.12);
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+}
+
+.scheduler-legend {
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+}
+
+.dot.available { background: #1c945e; }
+.dot.limited { background: #d39616; }
+.dot.busy { background: #bf3535; }
+
+.selected-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+}
+
+.selected-card h4 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+}
+
+.selected-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.selected-meta span {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(11, 142, 207, 0.08);
+  color: var(--brand-deep);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.slot-calendar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.slot-day {
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+}
+
+.slot-head strong {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.slot-head span,
+.slot-empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.slot-times {
+  margin-top: 14px;
+}
+
+.slot-btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.slot-btn.available {
+  background: rgba(28, 148, 94, 0.12);
+  color: #14613e;
+}
+
+.slot-btn.limited {
+  background: rgba(211, 150, 22, 0.14);
+  color: #8a5a00;
+}
+
+.slot-btn.busy,
+.slot-btn:disabled {
+  background: rgba(191, 53, 53, 0.12);
+  color: #8a2f2f;
+  cursor: not-allowed;
+}
+
+.patient-form label,
+.pin-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--brand-deep);
+  font-weight: 700;
+}
+
+.patient-form .full {
+  grid-column: 1 / -1;
+}
+
+.patient-form input,
+.patient-form select,
+.patient-form textarea,
+.pin-form input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(11, 74, 120, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text);
+  font: inherit;
+}
+
+.submit-btn {
+  width: fit-content;
+}
+
+.form-response,
+.admin-feedback,
+.empty-box {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(11, 142, 207, 0.08);
+  color: var(--brand-deep);
+}
+
+.doctor-grid,
+.status-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.doctor-status-card,
+.status-card,
+.request-card {
+  padding: 20px;
+}
+
+.doctor-available {
+  border-color: rgba(28, 148, 94, 0.25);
+}
+
+.doctor-limited {
+  border-color: rgba(211, 150, 22, 0.25);
+}
+
+.doctor-busy {
+  border-color: rgba(191, 53, 53, 0.22);
+}
+
+.doctor-top {
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.doctor-branch,
+.doctor-status {
+  display: inline-flex;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.doctor-branch {
+  background: rgba(11, 142, 207, 0.1);
+  color: var(--brand-deep);
+}
+
+.doctor-status {
+  background: rgba(244, 189, 86, 0.18);
+  color: #8a5a00;
+}
+
+.doctor-card h3,
+.doctor-status-card h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+.doctor-role {
+  margin: 10px 0 16px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.doctor-meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  flex-direction: column;
+}
+
+.doctor-meta li {
+  color: var(--muted);
+}
+
+.ghost-btn {
+  padding: 10px 14px;
+  border: 1px solid rgba(11, 74, 120, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--brand-deep);
+  font-family: var(--font-display);
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .contact-card {
   padding: 34px;
 }
@@ -520,6 +876,7 @@ a {
   .feature,
   .team-layout,
   .contact,
+  .patient-form,
   .service-grid {
     grid-template-columns: 1fr;
   }
@@ -575,8 +932,16 @@ a {
 
   .hero-visual,
   .gallery,
-  .address-grid {
+  .address-grid,
+  .booking-list,
+  .doctor-grid,
+  .status-controls,
+  .slot-calendar {
     grid-template-columns: 1fr;
+  }
+
+  .selected-card {
+    flex-direction: column;
   }
 
   .hero h1 {
