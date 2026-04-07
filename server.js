@@ -7,13 +7,7 @@ const cors = require("cors");
 
 const app = express();  // 👈 ЭНЭ ДУТАЖ БАЙНА
 
-app.use(cors({
-  origin: [
-    "https://toto-dental.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+app.use(cors());
 
 const { initDatabase } = require("./backend/database");
 
