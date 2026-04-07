@@ -1,3 +1,5 @@
+const API = "https://toto-dental.onrender.com";
+
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
