@@ -129,7 +129,9 @@ function setSessionCookie(res, token) {
 }
 
 function clearSessionCookie(res) {
-  res.setHeader("Set-Cookie", `${SESSION_COOKIE}=; Path=/; HttpOnly; Max-Age=0; SameSite=Lax`);
+  const isProduction = process.env.NODE_ENV === "production";
+  const sameSite = isProduction ? "SameSite=None; Secure" : "SameSite=Lax";
+  res.setHeader("Set-Cookie", `${SESSION_COOKIE}=; Path=/; HttpOnly; Max-Age=0; ${sameSite}`);
 }
 
 function getDoctorById(doctorId) {
@@ -571,26 +573,23 @@ serverApp.patch("/api/admin/doctors/:id", requireAdmin, (req, res, next) => {
 serverApp.use("/assets", express.static(path.join(ROOT, "assets")));
 serverApp.use("/admin", express.static(path.join(ROOT, "admin")));
 serverApp.use("/booking", express.static(path.join(ROOT, "booking")));
+serverApp.use("/doctors", express.static(path.join(ROOT, "doctors")));
 serverApp.use(express.static(ROOT));
 
 serverApp.get("/", (req, res) => {
   res.sendFile(path.join(ROOT, "index.html"));
 });
 
-serverApp.get("/booking", (req, res) => {
+serverApp.get(["/booking", "/booking/"], (req, res) => {
   res.sendFile(path.join(ROOT, "booking", "index.html"));
 });
 
-serverApp.get("/booking/", (req, res) => {
-  res.sendFile(path.join(ROOT, "booking", "index.html"));
-});
-
-serverApp.get("/admin", (req, res) => {
+serverApp.get(["/admin", "/admin/"], (req, res) => {
   res.sendFile(path.join(ROOT, "admin", "index.html"));
 });
 
-serverApp.get("/admin/", (req, res) => {
-  res.sendFile(path.join(ROOT, "admin", "index.html"));
+serverApp.get(["/doctors", "/doctors/"], (req, res) => {
+  res.sendFile(path.join(ROOT, "doctors", "index.html"));
 });
 
 serverApp.use((req, res) => {

@@ -668,6 +668,15 @@ async function initAdmin() {
 }
 
 initAdmin().catch((error) => {
+  const loginPanel = document.querySelector("#login-panel");
+  const deniedPanel = document.querySelector("#denied-panel");
+  const workspace = document.querySelector("#admin-workspace");
   const loginFeedback = document.querySelector("#login-feedback");
-  if (loginFeedback) loginFeedback.textContent = error.message;
+
+  if (deniedPanel) deniedPanel.hidden = true;
+  if (workspace) workspace.hidden = true;
+  if (loginPanel) loginPanel.hidden = false;
+  if (loginFeedback) {
+    loginFeedback.textContent = error.message || "Admin panel ачаалахад алдаа гарлаа.";
+  }
 });
