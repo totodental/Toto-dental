@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="mn">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,13 +20,9 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-
   <title>Toto Dental | Цаг захиалах</title>
-
   <meta name="theme-color" content="#0b8ecf">
   <meta name="description" content="Toto Dental эмчийн цаг захиалга">
-
-  <!-- ✅ HTTPS only -->
   <link rel="icon" href="/assets/logo.jpg">
   <link rel="stylesheet" href="/style.css">
 </head>
@@ -37,6 +35,7 @@
     <nav class="nav">
       <a href="/">Нүүр</a>
       <a href="/#services">Үйлчилгээ</a>
+      <a href="/doctors/">Эмч нар</a>
       <a href="/#contact">Холбоо барих</a>
     </nav>
     <a class="call-btn" href="tel:77551595">☎ 7755-1595</a>
@@ -46,17 +45,17 @@
     <section class="booking section" id="booking">
       <div class="section-heading">
         <p class="eyebrow">Цаг захиалга</p>
-        <h2>Эмчээ сонгоод боломжит цаг дээр хүсэлт илгээнэ</h2>
+        <h2>Эмчээ сонгоод өөрт тохирох цагаа хүсэлтээр илгээнэ</h2>
       </div>
       <div class="booking-layout">
         <div class="booking-stack reveal">
           <section class="booking-panel patient-panel">
             <div class="panel-head">
               <div>
-                <p class="panel-kicker">Patient Booking</p>
-                <h3>Цагийн хүсэлт илгээх</h3>
+                <p class="panel-kicker">Онлайн бүртгэл</p>
+                <h3>Үзлэгийн цагийн хүсэлт илгээх</h3>
               </div>
-              <span class="panel-chip">Prod-ready frontend</span>
+              <span class="panel-chip">Хурдан, хялбар, ойлгомжтой</span>
             </div>
             <div class="scheduler-shell">
               <div class="scheduler-toolbar">
@@ -83,11 +82,11 @@
             <form class="patient-form" id="patient-form">
               <label>
                 Нэр
-                <input type="text" name="patientName" placeholder="Өвчтөний нэр" required>
+                <input type="text" name="patientName" placeholder="Өөрийн нэрээ оруулна уу" required>
               </label>
               <label>
                 Утас
-                <input type="tel" name="phone" placeholder="9999-9999" required>
+                <input type="tel" name="phone" placeholder="Жишээ: 9911-2233" required>
               </label>
               <label>
                 Эмч
@@ -110,13 +109,12 @@
               </label>
               <label class="full">
                 Үйлчилгээ / тайлбар
-                <textarea name="notes" rows="4" placeholder="Жишээ: аппаратын хяналт, өвдөлт, цайруулалт"></textarea>
+                <textarea name="notes" rows="4" placeholder="Жишээ: анхны үзлэг, аппаратын хяналт, өвдөлт, цоорлын эмчилгээ"></textarea>
               </label>
               <button class="primary-btn submit-btn" type="submit">Хүсэлт илгээх</button>
             </form>
             <div class="form-response" id="form-response" hidden></div>
           </section>
-
         </div>
       </div>
     </section>
@@ -126,7 +124,7 @@
     <img src="../assets/logo.jpg" alt="Toto Dental лого">
     <div>
       <strong>Toto Dental</strong>
-      <p>Хүүхдийн шүд, гажиг заслын эмнэлэг</p>
+      <p>Эрүүл шүд, итгэлтэй инээмсэглэлийн төлөө</p>
     </div>
     <a href="tel:77551595">7755-1595</a>
   </footer>

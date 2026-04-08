@@ -21,7 +21,7 @@ async function requestJson(url, options = {}) {
   });
 
   if (!response.ok) {
-    let message = "Request failed";
+    let message = "Хүсэлт амжилтгүй боллоо";
     try {
       const errorBody = await response.json();
       message = errorBody.error || message;
@@ -577,7 +577,7 @@ async function initAdmin() {
       const selectedDate = day.dataset.date || "";
       resetEditor(selectedDate);
       renderDayDetails(selectedDate);
-      editorFeedback.textContent = `${selectedDate} өдрийн захиалгуудыг доорх Day Details хэсгээс харна.`;
+      editorFeedback.textContent = `${selectedDate} өдрийн захиалгуудыг доорх "Өдрийн дэлгэрэнгүй" хэсгээс харна.`;
     }
   });
 

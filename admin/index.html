@@ -15,7 +15,7 @@
       <div class="admin-brand">
         <img src="/assets/logo.jpg" alt="Toto Dental">
         <div>
-          <p class="panel-kicker">Private Admin</p>
+          <p class="panel-kicker">Нууц хандалт</p>
           <h1>Toto Dental Reception</h1>
         </div>
       </div>
@@ -23,10 +23,10 @@
       <div class="admin-panel login-panel" id="login-panel" hidden>
         <div class="panel-head">
           <div>
-            <p class="panel-kicker">Secure Login</p>
-            <h3>Reception нэвтрэх</h3>
+            <p class="panel-kicker">Админ нэвтрэх</p>
+            <h3>Reception нэвтрэх хэсэг</h3>
           </div>
-          <span class="panel-chip accent">Admin only</span>
+          <span class="panel-chip accent">Зөвхөн ажилтанд</span>
         </div>
         <form id="admin-login-form" class="admin-login-form">
           <label>
@@ -39,11 +39,11 @@
           </label>
           <button class="primary-btn submit-btn" type="submit">Нэвтрэх</button>
         </form>
-        <div class="admin-feedback" id="login-feedback">Зөв `id` query-тэй үед л login form нээгдэнэ.</div>
+        <div class="admin-feedback" id="login-feedback">Зөв нууц линкээр нэвтэрсэн үед login хэсэг нээгдэнэ.</div>
       </div>
 
       <div class="admin-panel denied-panel" id="denied-panel" hidden>
-        <p class="panel-kicker">Access Denied</p>
+        <p class="panel-kicker">Хандалт хаалттай</p>
         <h3>Нууц admin линк буруу байна</h3>
         <p>Зөв `/admin?id=...` линкээр орж ирэх шаардлагатай.</p>
       </div>
@@ -52,8 +52,8 @@
         <section class="admin-panel admin-overview">
           <div class="panel-head">
             <div>
-              <p class="panel-kicker">Reception Console</p>
-              <h3>Хүсэлт ба хуваарь</h3>
+              <p class="panel-kicker">Reception хяналт</p>
+              <h3>Цагийн хүсэлт ба хуваарь</h3>
             </div>
             <button class="ghost-btn" id="admin-logout" type="button">Гарах</button>
           </div>
@@ -78,7 +78,7 @@
           <section class="admin-panel calendar-panel">
             <div class="queue-head">
               <div>
-                <p class="panel-kicker">Calendar View</p>
+                <p class="panel-kicker">Календарь</p>
                 <h4 id="calendar-title">Захиалгын календарь</h4>
               </div>
               <div class="calendar-actions">
@@ -102,12 +102,12 @@
             <div class="day-detail-panel" id="day-detail-panel">
               <div class="queue-head">
                 <div>
-                  <p class="panel-kicker">Day Details</p>
-                  <h4 id="day-detail-title">Өдөр сонгоогүй байна</h4>
+                  <p class="panel-kicker">Өдрийн дэлгэрэнгүй</p>
+                  <h4 id="day-detail-title">Өдөр сонгогдоогүй байна</h4>
                 </div>
               </div>
               <div class="day-detail-list" id="day-detail-list">
-                <div class="empty-box">Календарь дээрх өдөр эсвэл `+N өөр` дээр дарж тухайн өдрийн бүх захиалгыг харна.</div>
+                <div class="empty-box">Календарь дээрх өдөр эсвэл `+N өөр` товч дээр дарж тухайн өдрийн бүх захиалгыг харна.</div>
               </div>
             </div>
           </section>
@@ -116,7 +116,7 @@
             <div class="queue-head">
               <div>
                 <h4>Ирсэн хүсэлтүүд</h4>
-                <p class="admin-subtle">Card дээрх “Өөрчлөх” эсвэл календарь дээрх event дээр дарж workspace form-д нээнэ.</p>
+                <p class="admin-subtle">Засах бол карт дээрх “Өөрчлөх” товчийг, дэлгэрэнгүй харах бол календарь дээрх event-ийг ашиглана.</p>
               </div>
               <div class="calendar-actions">
                 <button class="ghost-btn" id="admin-create-appointment" type="button">Шинэ цаг</button>
@@ -130,7 +130,7 @@
             <div class="queue-head">
               <div>
                 <h4>Цагийн workspace</h4>
-                <p class="admin-subtle">Шинээр нэмэх, засах, confirmed болгох, эсвэл календарь дээрээс өдөр рүү нь чирж өөрчилнө.</p>
+                <p class="admin-subtle">Шинээр нэмэх, засах, баталгаажуулах, эсвэл календарь дээрээс чирж өдөр солих боломжтой.</p>
               </div>
               <div class="calendar-actions">
                 <button class="ghost-btn" id="editor-reset" type="button">Цэвэрлэх</button>
@@ -180,11 +180,11 @@
               </label>
               <div class="editor-actions full">
                 <button class="primary-btn submit-btn" id="editor-save" type="submit">Хадгалах</button>
-                <button class="ghost-btn" id="editor-confirm" type="button">Confirmed болгох</button>
+                <button class="ghost-btn" id="editor-confirm" type="button">Баталгаажуулах</button>
                 <button class="ghost-btn" id="editor-delete" type="button">Устгах</button>
               </div>
             </form>
-            <div class="admin-feedback" id="editor-feedback">Календарь дээрх захиалгыг чирээд өөр өдөр рүү зөөж болно. Цагийн өөрчлөлтийг энэ form дээрээс удирдана.</div>
+            <div class="admin-feedback" id="editor-feedback">Календарь дээрх захиалгыг чирж өөр өдөр рүү зөөж болно. Цагийн өөрчлөлтийг энэ хэсгээс удирдана.</div>
           </section>
 
           <section class="admin-panel">

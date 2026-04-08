@@ -32,7 +32,7 @@ async function requestJson(url, options = {}) {
   });
 
   if (!response.ok) {
-    let message = "Request failed";
+    let message = "Хүсэлт амжилтгүй боллоо";
     try {
       const errorBody = await response.json();
       message = errorBody.error || message;
@@ -131,7 +131,7 @@ async function initBooking() {
     selectedDoctor.innerHTML = `
       <article class="selected-card selected-${doctor.availability}">
         <div>
-          <p class="panel-kicker">Selected Doctor</p>
+          <p class="panel-kicker">Сонгогдсон эмч</p>
           <h4>${doctor.name}</h4>
           <p>${doctor.role}</p>
         </div>
