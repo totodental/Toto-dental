@@ -1,4 +1,7 @@
-const API = "https://toto-dental.onrender.com";
+const API =
+  window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+    ? window.location.origin
+    : "https://toto-dental.onrender.com";
 
 const observer = new IntersectionObserver(
   (entries) => {
@@ -43,6 +46,8 @@ async function requestJson(url, options = {}) {
 }
 
 async function initBooking() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedDoctorId = params.get("doctor") || "";
   const doctorGrid = document.querySelector("#doctor-grid");
   const doctorSelect = document.querySelector("#doctor-select");
   const doctorPicker = document.querySelector("#doctor-picker");
@@ -54,7 +59,6 @@ async function initBooking() {
   const formResponse = document.querySelector("#form-response");
 
   if (
-    !doctorGrid ||
     !doctorSelect ||
     !doctorPicker ||
     !branchPicker ||
@@ -69,8 +73,13 @@ async function initBooking() {
 
   const data = await requestJson(`${API}/api/public/booking`);
   const doctors = data.doctors || [];
-  let activeBranch = doctors[0]?.branch || "Салбар 1";
-  let activeDoctorId = doctors.find((doctor) => doctor.branch === activeBranch)?.id || doctors[0]?.id || "";
+  const requestedDoctor = doctors.find((doctor) => doctor.id === requestedDoctorId);
+  let activeBranch = requestedDoctor?.branch || doctors[0]?.branch || "Салбар 1";
+  let activeDoctorId =
+    requestedDoctor?.id ||
+    doctors.find((doctor) => doctor.branch === activeBranch)?.id ||
+    doctors[0]?.id ||
+    "";
 
   const getFilteredDoctors = () => doctors.filter((doctor) => doctor.branch === activeBranch);
 
@@ -93,6 +102,7 @@ async function initBooking() {
   };
 
   const renderDoctors = () => {
+    if (!doctorGrid) return;
     doctorGrid.innerHTML = getFilteredDoctors()
       .map(
         (doctor) => `

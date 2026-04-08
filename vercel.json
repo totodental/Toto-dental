@@ -8,6 +8,10 @@
     {
       "source": "/booking",
       "destination": "/booking/index.html"
+    },
+    {
+      "source": "/doctors",
+      "destination": "/doctors/index.html"
     }
   ],
   "headers": [

@@ -5,9 +5,9 @@ const express = require("express");
 
 const { initDatabase } = require("./backend/database");
 
-const app = express();
-app.disable("x-powered-by");
-app.set("trust proxy", 1);
+const serverApp = express();
+serverApp.disable("x-powered-by");
+serverApp.set("trust proxy", 1);
 
 function loadEnvFile() {
   const envPath = path.join(__dirname, ".env");
@@ -64,7 +64,7 @@ const allowedOrigins = new Set(
 
 const db = initDatabase();
 
-app.use((req, res, next) => {
+serverApp.use((req, res, next) => {
   const origin = req.headers.origin;
 
   if (origin && allowedOrigins.has(origin)) {
@@ -88,7 +88,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.json({ limit: "1mb" }));
+serverApp.use(express.json({ limit: "1mb" }));
 
 function createError(statusCode, message) {
   const error = new Error(message);
@@ -348,15 +348,15 @@ function buildDoctorsResponse() {
   });
 }
 
-app.get("/api/health", (req, res) => {
+serverApp.get("/api/health", (req, res) => {
   res.json({ ok: true });
 });
 
-app.get("/api/public/booking", (req, res) => {
+serverApp.get("/api/public/booking", (req, res) => {
   res.json({ doctors: buildDoctorsResponse() });
 });
 
-app.post("/api/public/requests", (req, res, next) => {
+serverApp.post("/api/public/requests", (req, res, next) => {
   try {
     const payload = buildAppointmentPayload({ ...req.body, status: "pending" });
     const now = new Date().toISOString();
@@ -386,7 +386,7 @@ app.post("/api/public/requests", (req, res, next) => {
   }
 });
 
-app.get("/api/admin/session", (req, res) => {
+serverApp.get("/api/admin/session", (req, res) => {
   const routeValid = (req.query.id || "") === ADMIN_ROUTE_ID;
   if (!routeValid) {
     res.json({ routeValid: false, authenticated: false });
@@ -410,7 +410,7 @@ app.get("/api/admin/session", (req, res) => {
   res.json({ routeValid: true, authenticated: Boolean(session) });
 });
 
-app.post("/api/admin/login", (req, res, next) => {
+serverApp.post("/api/admin/login", (req, res, next) => {
   try {
     const { routeId = "", username = "", password = "" } = req.body || {};
 
@@ -441,13 +441,13 @@ app.post("/api/admin/login", (req, res, next) => {
   }
 });
 
-app.post("/api/admin/logout", requireAdmin, (req, res) => {
+serverApp.post("/api/admin/logout", requireAdmin, (req, res) => {
   db.prepare("DELETE FROM admin_sessions WHERE token = ?").run(req.adminSession.token);
   clearSessionCookie(res);
   res.json({ ok: true });
 });
 
-app.get("/api/admin/dashboard", requireAdmin, (req, res) => {
+serverApp.get("/api/admin/dashboard", requireAdmin, (req, res) => {
   const doctors = db.prepare(`
     SELECT id, name, role, branch, hours, availability, note
     FROM doctors
@@ -460,7 +460,7 @@ app.get("/api/admin/dashboard", requireAdmin, (req, res) => {
   });
 });
 
-app.post("/api/admin/appointments", requireAdmin, (req, res, next) => {
+serverApp.post("/api/admin/appointments", requireAdmin, (req, res, next) => {
   try {
     const payload = buildAppointmentPayload(req.body || {});
     ensureNoConfirmedConflict(payload);
@@ -492,7 +492,7 @@ app.post("/api/admin/appointments", requireAdmin, (req, res, next) => {
   }
 });
 
-app.patch("/api/admin/appointments/:id", requireAdmin, (req, res, next) => {
+serverApp.patch("/api/admin/appointments/:id", requireAdmin, (req, res, next) => {
   try {
     const existing = getAppointmentById(req.params.id);
     if (!existing) throw createError(404, "Захиалга олдсонгүй.");
@@ -523,7 +523,7 @@ app.patch("/api/admin/appointments/:id", requireAdmin, (req, res, next) => {
   }
 });
 
-app.delete("/api/admin/appointments/:id", requireAdmin, (req, res, next) => {
+serverApp.delete("/api/admin/appointments/:id", requireAdmin, (req, res, next) => {
   try {
     const result = db.prepare("DELETE FROM appointments WHERE id = ?").run(req.params.id);
     if (!result.changes) throw createError(404, "Захиалга олдсонгүй.");
@@ -533,7 +533,7 @@ app.delete("/api/admin/appointments/:id", requireAdmin, (req, res, next) => {
   }
 });
 
-app.delete("/api/admin/requests/:id", requireAdmin, (req, res, next) => {
+serverApp.delete("/api/admin/requests/:id", requireAdmin, (req, res, next) => {
   try {
     const result = db.prepare("DELETE FROM appointments WHERE id = ?").run(req.params.id);
     if (!result.changes) throw createError(404, "Хүсэлт олдсонгүй.");
@@ -543,12 +543,12 @@ app.delete("/api/admin/requests/:id", requireAdmin, (req, res, next) => {
   }
 });
 
-app.delete("/api/admin/requests", requireAdmin, (req, res) => {
+serverApp.delete("/api/admin/requests", requireAdmin, (req, res) => {
   db.prepare("DELETE FROM appointments").run();
   res.status(204).end();
 });
 
-app.patch("/api/admin/doctors/:id", requireAdmin, (req, res, next) => {
+serverApp.patch("/api/admin/doctors/:id", requireAdmin, (req, res, next) => {
   try {
     const availability = req.body?.availability;
     if (!["available", "limited", "busy"].includes(availability)) {
@@ -568,32 +568,32 @@ app.patch("/api/admin/doctors/:id", requireAdmin, (req, res, next) => {
   }
 });
 
-app.use("/assets", express.static(path.join(ROOT, "assets")));
-app.use("/admin", express.static(path.join(ROOT, "admin")));
-app.use("/booking", express.static(path.join(ROOT, "booking")));
-app.use(express.static(ROOT));
+serverApp.use("/assets", express.static(path.join(ROOT, "assets")));
+serverApp.use("/admin", express.static(path.join(ROOT, "admin")));
+serverApp.use("/booking", express.static(path.join(ROOT, "booking")));
+serverApp.use(express.static(ROOT));
 
-app.get("/", (req, res) => {
+serverApp.get("/", (req, res) => {
   res.sendFile(path.join(ROOT, "index.html"));
 });
 
-app.get("/booking", (req, res) => {
+serverApp.get("/booking", (req, res) => {
   res.sendFile(path.join(ROOT, "booking", "index.html"));
 });
 
-app.get("/booking/", (req, res) => {
+serverApp.get("/booking/", (req, res) => {
   res.sendFile(path.join(ROOT, "booking", "index.html"));
 });
 
-app.get("/admin", (req, res) => {
+serverApp.get("/admin", (req, res) => {
   res.sendFile(path.join(ROOT, "admin", "index.html"));
 });
 
-app.get("/admin/", (req, res) => {
+serverApp.get("/admin/", (req, res) => {
   res.sendFile(path.join(ROOT, "admin", "index.html"));
 });
 
-app.use((req, res) => {
+serverApp.use((req, res) => {
   if (req.path.startsWith("/api/")) {
     res.status(404).json({ error: "Not found" });
     return;
@@ -602,13 +602,13 @@ app.use((req, res) => {
   res.status(404).sendFile(path.join(ROOT, "index.html"));
 });
 
-app.use((err, req, res, next) => {
+serverApp.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     error: err.message || "Server error"
   });
 });
 
-app.listen(PORT, "0.0.0.0", () => {
+serverApp.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
 });

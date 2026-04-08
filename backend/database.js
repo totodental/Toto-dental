@@ -7,45 +7,51 @@ const DB_PATH = path.join(DATA_DIR, "app.db");
 
 const seedDoctors = [
   {
-    id: "anu",
-    name: "Эмч Ану",
-    role: "Хүүхдийн шүд, ерөнхий үзлэг",
+    id: "narantsengel",
+    name: "Б.Наранцэнгэл",
+    role: "Анагаах ухааны докторант, Нүүр амны гажиг заслын их эмч",
     branch: "Салбар 1",
-    hours: "Даваа, Лхагва, Баасан · 09:00-13:00",
+    hours: "Даваа-Баасан · 10:00-18:00",
     availability: "available",
-    note: "Өглөөний цагт үзлэг авна.",
+    note: "Гажиг заслын оношилгоо, аппаратын хяналт, урт хугацааны төлөвлөгөө."
   },
   {
-    id: "togoldor",
-    name: "Эмч Төгөлдөр",
-    role: "Гажиг засал, аппарат",
+    id: "lkhagvadorj",
+    name: "Э.Лхагвадорж",
+    role: "Нүүр амны мэс заслын их эмч",
     branch: "Салбар 2",
     hours: "Мягмар, Пүрэв, Бямба · 10:00-18:00",
     availability: "limited",
-    note: "Аппаратын хяналт, шинэ төлөвлөгөө.",
+    note: "Нүүр амны мэс заслын үзлэг, шүд авалт, мэс заслын зөвлөгөө."
   },
   {
-    id: "nomin",
-    name: "Эмч Номин",
-    role: "Согог засал, винир, циркон",
+    id: "mandakhnaran",
+    name: "З.Мандахнаран",
+    role: "Нүүр амны эмчилгээний их эмч",
     branch: "Салбар 1",
-    hours: "Даваа-Бямба · 14:00-18:00",
-    availability: "busy",
-    note: "Өнөөдрийн хуваарь дүүрсэн үед reception хаана.",
+    hours: "Даваа-Бямба · 11:00-18:00",
+    availability: "available",
+    note: "Анатомын бүтэц дагасан байгалийн мэт ломбо, шүд цоорох өвчлөлийн нарийн эмчилгээ."
   }
 ];
+
+const legacyDoctorMap = {
+  anu: "narantsengel",
+  togoldor: "lkhagvadorj",
+  nomin: "mandakhnaran"
+};
 
 function generateSlots(days = 3, startHour = 8, endHour = 18) {
   const slots = [];
 
-  for (let d = 0; d < days; d++) {
+  for (let d = 0; d < days; d += 1) {
     const date = new Date();
     date.setDate(date.getDate() + d);
 
     const label = date.toLocaleDateString("mn-MN", { weekday: "long" });
     const dateStr = date.toISOString().split("T")[0];
 
-    for (let h = startHour; h < endHour; h++) {
+    for (let h = startHour; h < endHour; h += 1) {
       const time = `${String(h).padStart(2, "0")}:00`;
 
       slots.push({
@@ -57,6 +63,13 @@ function generateSlots(days = 3, startHour = 8, endHour = 18) {
   }
 
   return slots;
+}
+
+function getSeedSlots(doctorId) {
+  if (doctorId === "narantsengel") return generateSlots(5, 10, 19);
+  if (doctorId === "lkhagvadorj") return generateSlots(4, 10, 19);
+  if (doctorId === "mandakhnaran") return generateSlots(6, 11, 19);
+  return generateSlots(3, 10, 18);
 }
 
 function initDatabase() {
@@ -112,46 +125,55 @@ function initDatabase() {
     );
   `);
 
-  const doctorCount = db.prepare("SELECT COUNT(*) AS count FROM doctors").get().count;
+  const upsertDoctor = db.prepare(`
+    INSERT INTO doctors (id, name, role, branch, hours, availability, note)
+    VALUES (@id, @name, @role, @branch, @hours, @availability, @note)
+    ON CONFLICT(id) DO UPDATE SET
+      name = excluded.name,
+      role = excluded.role,
+      branch = excluded.branch,
+      hours = excluded.hours,
+      availability = excluded.availability,
+      note = excluded.note
+  `);
 
-  if (doctorCount === 0) {
-    const insertDoctor = db.prepare(`
-      INSERT INTO doctors (id, name, role, branch, hours, availability, note)
-      VALUES (@id, @name, @role, @branch, @hours, @availability, @note)
-    `);
+  const deleteDoctorSlots = db.prepare("DELETE FROM doctor_slots WHERE doctor_id = ?");
+  const insertSlot = db.prepare(`
+    INSERT INTO doctor_slots (doctor_id, label, slot_date, slot_time)
+    VALUES (@doctor_id, @label, @slot_date, @slot_time)
+  `);
 
-    const insertSlot = db.prepare(`
-      INSERT INTO doctor_slots (doctor_id, label, slot_date, slot_time)
-      VALUES (@doctor_id, @label, @slot_date, @slot_time)
-    `);
-
-    const tx = db.transaction(() => {
-      for (const doctor of seedDoctors) {
-        insertDoctor.run(doctor);
-
-        let slots;
-
-        if (doctor.id === "anu") {
-          slots = generateSlots(3, 9, 14); // 09–13 ✔
-        } else if (doctor.id === "togoldor") {
-          slots = generateSlots(3, 10, 19); // 10–18 ✔
-        } else if (doctor.id === "nomin") {
-          slots = generateSlots(3, 14, 19); // 14–18 ✔
-        }
-
-        for (const slot of slots) {
-          insertSlot.run({
-            doctor_id: doctor.id,
-            label: slot.label,
-            slot_date: slot.date,
-            slot_time: slot.time
-          });
-        }
-      }
+  const syncSeedData = db.transaction(() => {
+    seedDoctors.forEach((doctor) => {
+      upsertDoctor.run(doctor);
     });
 
-    tx();
-  }
+    Object.entries(legacyDoctorMap).forEach(([legacyId, nextId]) => {
+      db.prepare(`
+        UPDATE appointments
+        SET doctor_id = ?, updated_at = ?
+        WHERE doctor_id = ?
+      `).run(nextId, new Date().toISOString(), legacyId);
+
+      deleteDoctorSlots.run(legacyId);
+      db.prepare("DELETE FROM doctors WHERE id = ?").run(legacyId);
+    });
+
+    seedDoctors.forEach((doctor) => {
+      deleteDoctorSlots.run(doctor.id);
+
+      getSeedSlots(doctor.id).forEach((slot) => {
+        insertSlot.run({
+          doctor_id: doctor.id,
+          label: slot.label,
+          slot_date: slot.date,
+          slot_time: slot.time
+        });
+      });
+    });
+  });
+
+  syncSeedData();
 
   return db;
 }
