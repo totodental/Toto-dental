@@ -33,13 +33,14 @@ function createAuthHelpers(config, sessionModel) {
 
   function setSessionCookie(res, token) {
     const isProduction = process.env.NODE_ENV === "production";
+    const sameSite = isProduction ? "SameSite=None" : "SameSite=Lax";
     const cookieParts = [
       `${config.sessionCookie}=${encodeURIComponent(token)}`,
       "Path=/",
       "HttpOnly",
       `Max-Age=${Math.floor(config.sessionMaxAgeMs / 1000)}`,
       isProduction ? "Secure" : "",
-      "SameSite=Lax"
+      sameSite
     ].filter(Boolean);
 
     res.setHeader("Set-Cookie", cookieParts.join("; "));
@@ -47,7 +48,7 @@ function createAuthHelpers(config, sessionModel) {
 
   function clearSessionCookie(res) {
     const isProduction = process.env.NODE_ENV === "production";
-    const sameSite = isProduction ? "SameSite=Lax; Secure" : "SameSite=Lax";
+    const sameSite = isProduction ? "SameSite=None; Secure" : "SameSite=Lax";
     res.setHeader("Set-Cookie", `${config.sessionCookie}=; Path=/; HttpOnly; Max-Age=0; ${sameSite}`);
   }
 

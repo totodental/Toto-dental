@@ -398,6 +398,8 @@ async function initAdmin() {
       await loadDashboard();
       resetEditor();
     } catch (error) {
+      loginPanel.hidden = false;
+      workspace.hidden = true;
       loginFeedback.textContent = error.message;
     }
   });
