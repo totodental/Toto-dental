@@ -4,7 +4,8 @@
   "description": "Landing page plus admin booking system for Toto Dental.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "check": "node -c server.js",
+    "test": "node -c server.js",
     "start": "node server.js"
   },
   "repository": {
