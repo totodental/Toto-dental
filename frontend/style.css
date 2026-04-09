@@ -84,6 +84,29 @@ a {
   color: var(--muted);
   font-family: var(--font-display);
   font-weight: 600;
+  align-items: center;
+}
+
+.nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.nav a:hover {
+  color: var(--brand-deep);
+  background: rgba(11, 142, 207, 0.08);
+}
+
+.nav a.is-active {
+  color: var(--brand-deep);
+  background: rgba(11, 142, 207, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(11, 74, 120, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .call-btn,

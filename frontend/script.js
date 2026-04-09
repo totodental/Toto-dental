@@ -14,6 +14,67 @@ const observer = new IntersectionObserver(
 
 document.querySelectorAll(".reveal").forEach((element) => observer.observe(element));
 
+function initNavHighlight() {
+  const navLinks = Array.from(document.querySelectorAll(".nav a"));
+  if (!navLinks.length) return;
+
+  const pathname = window.location.pathname.replace(/\/+$/, "") || "/";
+
+  const normalizeHref = (href) => {
+    const url = new URL(href, window.location.origin);
+    return {
+      path: url.pathname.replace(/\/+$/, "") || "/",
+      hash: url.hash || ""
+    };
+  };
+
+  const setActive = (predicate) => {
+    navLinks.forEach((link) => {
+      link.classList.toggle("is-active", predicate(link));
+    });
+  };
+
+  if (pathname === "/booking") {
+    setActive((link) => normalizeHref(link.href).path === "/booking");
+    return;
+  }
+
+  if (pathname === "/doctors") {
+    setActive((link) => normalizeHref(link.href).path === "/doctors");
+    return;
+  }
+
+  const sections = ["services", "feature", "team", "contact"]
+    .map((id) => document.getElementById(id))
+    .filter(Boolean);
+
+  if (!sections.length) {
+    setActive((link) => normalizeHref(link.href).path === "/");
+    return;
+  }
+
+  const updateActiveSection = () => {
+    const marker = window.scrollY + 160;
+    let currentSection = "";
+
+    sections.forEach((section) => {
+      if (marker >= section.offsetTop) {
+        currentSection = section.id;
+      }
+    });
+
+    if (!currentSection) {
+      setActive((link) => normalizeHref(link.href).path === "/" && !normalizeHref(link.href).hash);
+      return;
+    }
+
+    setActive((link) => normalizeHref(link.href).hash === `#${currentSection}`);
+  };
+
+  updateActiveSection();
+  window.addEventListener("scroll", updateActiveSection, { passive: true });
+}
+
 const availabilityLabels = {
   available: "Завтай",
   limited: "Цөөн сул цагтай",
@@ -266,3 +327,5 @@ initBooking().catch((error) => {
     formResponse.textContent = error.message;
   }
 });
+
+initNavHighlight();

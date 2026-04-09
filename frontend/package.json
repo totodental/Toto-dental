@@ -1,0 +1,10 @@
+{
+  "name": "toto-dental-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static frontend for Toto Dental",
+  "scripts": {
+    "build": "node scripts/generate-config.js",
+    "test": "node scripts/generate-config.js"
+  }
+}
