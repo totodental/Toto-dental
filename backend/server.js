@@ -42,7 +42,7 @@ app.set("trust proxy", 1);
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  if (origin && config.allowedOrigins.has(origin)) {
+  if (origin && config.isAllowedOrigin(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Credentials", "true");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,PUT,DELETE,OPTIONS");

@@ -1,6 +1,23 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+function normalizeOrigin(value) {
+  return String(value || "").trim().replace(/\/+$/, "");
+}
+
+function isAllowedOrigin(origin, allowedOrigins) {
+  const normalizedOrigin = normalizeOrigin(origin);
+  if (!normalizedOrigin) return false;
+  if (allowedOrigins.has(normalizedOrigin)) return true;
+
+  try {
+    const parsed = new URL(normalizedOrigin);
+    return parsed.hostname.endsWith(".vercel.app");
+  } catch {
+    return false;
+  }
+}
+
 function loadEnvFiles() {
   const candidates = [
     path.join(__dirname, "..", ".env"),
@@ -38,6 +55,21 @@ function loadEnvFiles() {
 function getConfig() {
   loadEnvFiles();
 
+  const allowedOrigins = new Set(
+    (process.env.FRONTEND_ORIGINS ||
+      [
+        "https://toto-dental.vercel.app",
+        "https://toto-dental-hjbv.vercel.app",
+        "http://127.0.0.1:3000",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://localhost:5173"
+      ].join(","))
+      .split(",")
+      .map((item) => normalizeOrigin(item))
+      .filter(Boolean)
+  );
+
   return {
     port: Number(process.env.PORT || 3000),
     sessionSecret: process.env.SESSION_SECRET || "change-this-secret",
@@ -50,19 +82,8 @@ function getConfig() {
     rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 1000 * 60 * 10),
     loginRateLimitMax: Number(process.env.LOGIN_RATE_LIMIT_MAX || 10),
     publicRateLimitMax: Number(process.env.PUBLIC_RATE_LIMIT_MAX || 40),
-    allowedOrigins: new Set(
-      (process.env.FRONTEND_ORIGINS ||
-        [
-          "https://toto-dental-hjbv.vercel.app/",
-          "http://127.0.0.1:3000",
-          "http://localhost:3000",
-          "http://127.0.0.1:5173",
-          "http://localhost:5173"
-        ].join(","))
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean)
-    )
+    allowedOrigins,
+    isAllowedOrigin: (origin) => isAllowedOrigin(origin, allowedOrigins)
   };
 }
 
