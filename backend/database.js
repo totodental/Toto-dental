@@ -2,7 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const Database = require("better-sqlite3");
 
-const DATA_DIR = path.join(__dirname, "..", "data");
+const DATA_DIR = path.join(__dirname, "data");
 const DB_PATH = path.join(DATA_DIR, "app.db");
 
 const seedDoctors = [

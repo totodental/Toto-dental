@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = (window.__APP_CONFIG__?.API_BASE || "/api").replace(/\/+$/, "");
 
 const availabilityLabels = {
   available: "Завтай",
@@ -358,14 +358,14 @@ async function initAdmin() {
   };
 
   const loadDashboard = async () => {
-    const data = await requestJson("/api/admin/dashboard");
+    const data = await requestJson("/admin/dashboard");
     doctors = data.doctors || [];
     requests = data.requests || [];
     renderDoctorOptions();
     renderDashboard();
   };
 
-  const session = await requestJson(`/api/admin/session?id=${encodeURIComponent(routeId)}`);
+  const session = await requestJson(`/admin/session?id=${encodeURIComponent(routeId)}`);
   if (!session.routeValid) {
     deniedPanel.hidden = false;
     return;
@@ -384,7 +384,7 @@ async function initAdmin() {
   loginForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     try {
-      await requestJson("/api/admin/login", {
+      await requestJson("/admin/login", {
         method: "POST",
         body: JSON.stringify({
           routeId,
@@ -403,7 +403,7 @@ async function initAdmin() {
   });
 
   logoutBtn.addEventListener("click", async () => {
-    await requestJson("/api/admin/logout", { method: "POST" });
+    await requestJson("/admin/logout", { method: "POST" });
     window.location.reload();
   });
 
@@ -419,13 +419,13 @@ async function initAdmin() {
     try {
       const payload = getEditorPayload();
       if (selectedAppointmentId) {
-        await requestJson(`/api/admin/appointments/${selectedAppointmentId}`, {
+        await requestJson(`/admin/appointments/${selectedAppointmentId}`, {
           method: "PATCH",
           body: JSON.stringify(payload)
         });
         editorFeedback.textContent = "Захиалгын өөрчлөлт хадгалагдлаа.";
       } else {
-        const response = await requestJson("/api/admin/appointments", {
+        const response = await requestJson("/admin/appointments", {
           method: "POST",
           body: JSON.stringify(payload)
         });
@@ -446,12 +446,12 @@ async function initAdmin() {
 
     try {
       if (selectedAppointmentId) {
-        await requestJson(`/api/admin/appointments/${selectedAppointmentId}`, {
+        await requestJson(`/admin/appointments/${selectedAppointmentId}`, {
           method: "PATCH",
           body: JSON.stringify(payload)
         });
       } else {
-        const response = await requestJson("/api/admin/appointments", {
+        const response = await requestJson("/admin/appointments", {
           method: "POST",
           body: JSON.stringify(payload)
         });
@@ -472,7 +472,7 @@ async function initAdmin() {
     }
 
     try {
-      await requestJson(`/api/admin/appointments/${selectedAppointmentId}`, { method: "DELETE" });
+      await requestJson(`/admin/appointments/${selectedAppointmentId}`, { method: "DELETE" });
       await loadDashboard();
       resetEditor(editorDate.value);
       editorFeedback.textContent = "Захиалга устгагдлаа.";
@@ -497,7 +497,7 @@ async function initAdmin() {
 
     try {
       if (action === "delete") {
-        await requestJson(`/api/admin/requests/${requestId}`, { method: "DELETE" });
+        await requestJson(`/admin/requests/${requestId}`, { method: "DELETE" });
         if (selectedAppointmentId === requestId) {
           resetEditor(editorDate.value);
         }
@@ -505,7 +505,7 @@ async function initAdmin() {
         loadEditor(current);
       } else {
         const status = action === "confirm" ? "confirmed" : "cancelled";
-        await requestJson(`/api/admin/appointments/${requestId}`, {
+        await requestJson(`/admin/appointments/${requestId}`, {
           method: "PATCH",
           body: JSON.stringify({ status })
         });
@@ -527,7 +527,7 @@ async function initAdmin() {
     if (!doctorId || !status) return;
 
     try {
-      await requestJson(`/api/admin/doctors/${doctorId}`, {
+      await requestJson(`/admin/doctors/${doctorId}`, {
         method: "PATCH",
         body: JSON.stringify({ availability: status })
       });
@@ -542,7 +542,7 @@ async function initAdmin() {
     if (!confirmed) return;
 
     try {
-      await requestJson("/api/admin/requests", { method: "DELETE" });
+      await requestJson("/admin/requests", { method: "DELETE" });
       await loadDashboard();
       resetEditor(editorDate.value);
     } catch (error) {
@@ -632,7 +632,7 @@ async function initAdmin() {
     if (!appointment) return;
 
     try {
-      const updated = await requestJson(`/api/admin/appointments/${appointmentId}`, {
+      const updated = await requestJson(`/admin/appointments/${appointmentId}`, {
         method: "PATCH",
         body: JSON.stringify({
           ...appointment,

@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = (window.__APP_CONFIG__?.API_BASE || "/api").replace(/\/+$/, "");
 
 const observer = new IntersectionObserver(
   (entries) => {
@@ -21,7 +21,9 @@ const availabilityLabels = {
 };
 
 async function requestJson(url, options = {}) {
-  const response = await fetch(url, {
+  const finalUrl = url.startsWith("http") ? url : `${API_BASE}${url}`;
+
+  const response = await fetch(finalUrl, {
     headers: {
       "Content-Type": "application/json"
     },
@@ -68,7 +70,7 @@ async function initBooking() {
     return;
   }
 
-  const data = await requestJson(`${API_BASE}/public/booking`);
+  const data = await requestJson("/public/booking");
   const doctors = data.doctors || [];
   const requestedDoctor = doctors.find((doctor) => doctor.id === requestedDoctorId);
   let activeBranch = requestedDoctor?.branch || doctors[0]?.branch || "Салбар 1";
@@ -230,7 +232,7 @@ async function initBooking() {
     const formData = new FormData(patientForm);
 
     try {
-      await requestJson(`${API_BASE}/public/requests`, {
+      await requestJson("/public/requests", {
         method: "POST",
         body: JSON.stringify({
           patientName: formData.get("patientName"),

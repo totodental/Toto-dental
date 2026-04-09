@@ -4,7 +4,7 @@ Desktop.ini
 .vercel
 node_modules
 data/store.json
-data/app.db
-data/app.db-shm
-data/app.db-wal
+backend/data/app.db
+backend/data/app.db-shm
+backend/data/app.db-wal
 .env

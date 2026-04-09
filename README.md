@@ -1,48 +1,40 @@
 # Toto Dental
 
-Landing page plus appointment booking backend for Toto Dental.
+Refactored structure:
 
-## Local development
+- `backend/` Express API, SQLite database, routes, controllers, models
+- `frontend/` static website, booking UI, admin panel, doctors page, assets
+
+## Backend local development
 
 ```powershell
-cd "C:\Users\1021019180\Documents\Code\Toto Dental"
-node .\server.js
+cd "\backend"
+npm install
+node server.js
 ```
 
 Open `http://127.0.0.1:3000`.
 
-## Backend stack
+## Backend deployment on Render
 
-- Node.js + Express
-- SQLite via `better-sqlite3`
-- Static frontend served by the same Node app
+Use `backend/` as the Render root directory.
 
-Appointment data is stored in `data/app.db` and is created automatically on first run.
+- Install command: `npm install`
+- Start command: `node server.js`
 
-## Environment variables
+## Frontend deployment on Vercel
 
-- `PORT`
-- `ADMIN_ROUTE_ID`
-- `ADMIN_USERNAME`
-- `ADMIN_PASSWORD`
-- `SESSION_SECRET`
+Use the repository root for Vercel.
+The frontend files are served from `frontend/`.
 
-## Production deployment
+Build command:
 
-Deploy this project to a Node host such as Railway, Render, Fly.io, or a VPS.
+```bash
+npm run build
+```
 
-1. Push this folder to a Git repository.
-2. Create the environment variables from `.env.example`.
-3. Set the start command to `node server.js`.
-4. Attach your custom domain.
-5. Enable HTTPS on the hosting platform.
+Environment variable:
 
-## Files
-
-- `index.html` main page
-- `style.css` styles
-- `script.js` patient booking UI
-- `server.js` API and static server
-- `backend/database.js` SQLite schema and seed data
-- `admin/` private reception dashboard
-- `assets/` images
+```bash
+VITE_API_URL=https://toto-dental.onrender.com/api
+```
