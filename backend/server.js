@@ -1,10 +1,7 @@
-const fs = require("node:fs");
-const path = require("node:path");
 const express = require("express");
 
 const { initDatabase } = require("./database");
 const { getConfig } = require("./utils/env");
-const { createError } = require("./utils/http");
 const { createRateLimiter } = require("./middleware/rateLimit");
 const { createDoctorModel } = require("./models/doctorModel");
 const { createAppointmentModel } = require("./models/appointmentModel");
@@ -37,11 +34,12 @@ const adminController = createAdminController({
   authHelpers
 });
 
-const serverApp = express();
-serverApp.disable("x-powered-by");
-serverApp.set("trust proxy", 1);
+const app = express();
+app.disable("x-powered-by");
+app.set("trust proxy", 1);
 
-serverApp.use((req, res, next) => {
+// CORS + security headers
+app.use((req, res, next) => {
   const origin = req.headers.origin;
 
   if (origin && config.allowedOrigins.has(origin)) {
@@ -58,63 +56,38 @@ serverApp.use((req, res, next) => {
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
   if (req.method === "OPTIONS") {
-    res.status(204).end();
-    return;
+    return res.sendStatus(204);
   }
 
   next();
 });
 
-serverApp.use(express.json({ limit: "1mb" }));
-serverApp.use("/api", createPublicRoutes(publicController, applyRateLimit, config));
-serverApp.use("/api", createAdminRoutes(adminController, authHelpers.requireAdmin, applyRateLimit, config));
+app.use(express.json({ limit: "1mb" }));
 
-const frontendRoot = path.join(__dirname, "..", "frontend");
-if (fs.existsSync(frontendRoot)) {
-  serverApp.use("/assets", express.static(path.join(frontendRoot, "assets")));
-  serverApp.use("/admin", express.static(path.join(frontendRoot, "admin")));
-  serverApp.use("/booking", express.static(path.join(frontendRoot, "booking")));
-  serverApp.use("/doctors", express.static(path.join(frontendRoot, "doctors")));
-  serverApp.use(express.static(frontendRoot));
+// API routes
+app.use("/api", createPublicRoutes(publicController, applyRateLimit, config));
+app.use("/api", createAdminRoutes(adminController, authHelpers.requireAdmin, applyRateLimit, config));
 
-  serverApp.get("/", (req, res) => {
-    res.sendFile(path.join(frontendRoot, "index.html"));
-  });
+// Root check
+app.get("/", (req, res) => {
+  res.send("API running...");
+});
 
-  serverApp.get(["/booking", "/booking/"], (req, res) => {
-    res.sendFile(path.join(frontendRoot, "booking", "index.html"));
-  });
-
-  serverApp.get(["/admin", "/admin/"], (req, res) => {
-    res.sendFile(path.join(frontendRoot, "admin", "index.html"));
-  });
-
-  serverApp.get(["/doctors", "/doctors/"], (req, res) => {
-    res.sendFile(path.join(frontendRoot, "doctors", "index.html"));
-  });
-}
-
-serverApp.use((req, res) => {
-  if (req.path.startsWith("/api/")) {
-    res.status(404).json({ error: "Not found" });
-    return;
-  }
-
-  if (fs.existsSync(frontendRoot)) {
-    res.status(404).sendFile(path.join(frontendRoot, "index.html"));
-    return;
-  }
-
+// 404 handler
+app.use((req, res) => {
   res.status(404).json({ error: "Not found" });
 });
 
-serverApp.use((err, req, res, next) => {
+// Error handler
+app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     error: err.message || "Server error"
   });
 });
 
-serverApp.listen(config.port, "0.0.0.0", () => {
-  console.log(`Server running on http://0.0.0.0:${config.port}`);
+// Start server
+const PORT = process.env.PORT || config.port || 5000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });
