@@ -1,7 +1,4 @@
-const API =
-  window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
-    ? window.location.origin
-    : "https://toto-dental.onrender.com";
+const API_BASE = "/api";
 
 const observer = new IntersectionObserver(
   (entries) => {
@@ -71,7 +68,7 @@ async function initBooking() {
     return;
   }
 
-  const data = await requestJson(`${API}/api/public/booking`);
+  const data = await requestJson(`${API_BASE}/public/booking`);
   const doctors = data.doctors || [];
   const requestedDoctor = doctors.find((doctor) => doctor.id === requestedDoctorId);
   let activeBranch = requestedDoctor?.branch || doctors[0]?.branch || "Салбар 1";
@@ -233,7 +230,7 @@ async function initBooking() {
     const formData = new FormData(patientForm);
 
     try {
-      await requestJson(`${API}/api/public/requests`, {
+      await requestJson(`${API_BASE}/public/requests`, {
         method: "POST",
         body: JSON.stringify({
           patientName: formData.get("patientName"),

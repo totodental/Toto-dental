@@ -1,7 +1,4 @@
-const API =
-  window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
-    ? window.location.origin
-    : "https://toto-dental.onrender.com";
+const API_BASE = "/api";
 
 const availabilityLabels = {
   available: "Завтай",
@@ -10,7 +7,7 @@ const availabilityLabels = {
 };
 
 async function requestJson(url, options = {}) {
-  const finalUrl = url.startsWith("http") ? url : `${API}${url}`;
+  const finalUrl = url.startsWith("http") ? url : `${API_BASE}${url}`;
 
   const response = await fetch(finalUrl, {
     headers: {

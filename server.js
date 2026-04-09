@@ -47,6 +47,10 @@ const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 12;
 const ADMIN_ROUTE_ID = process.env.ADMIN_ROUTE_ID || "ashdgfaskfashjfgyuyfgywegiwgu";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
+const RATE_LIMIT_WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 1000 * 60 * 10);
+const LOGIN_RATE_LIMIT_MAX = Number(process.env.LOGIN_RATE_LIMIT_MAX || 10);
+const PUBLIC_RATE_LIMIT_MAX = Number(process.env.PUBLIC_RATE_LIMIT_MAX || 40);
 
 const allowedOrigins = new Set(
   (process.env.FRONTEND_ORIGINS ||
@@ -63,6 +67,15 @@ const allowedOrigins = new Set(
 );
 
 const db = initDatabase();
+const rateLimitStore = new Map();
+
+function getClientIp(req) {
+  return (
+    req.headers["x-forwarded-for"]?.toString().split(",")[0].trim() ||
+    req.socket.remoteAddress ||
+    "unknown"
+  );
+}
 
 serverApp.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -110,6 +123,17 @@ function signValue(value) {
   return crypto.createHmac("sha256", SESSION_SECRET).update(value).digest("hex");
 }
 
+function hashPassword(value) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
+
+function safeCompare(a, b) {
+  const left = Buffer.from(String(a));
+  const right = Buffer.from(String(b));
+  if (left.length !== right.length) return false;
+  return crypto.timingSafeEqual(left, right);
+}
+
 function createSessionToken() {
   return crypto.randomBytes(24).toString("hex");
 }
@@ -122,7 +146,7 @@ function setSessionCookie(res, token) {
     "HttpOnly",
     `Max-Age=${Math.floor(SESSION_MAX_AGE_MS / 1000)}`,
     isProduction ? "Secure" : "",
-    isProduction ? "SameSite=None" : "SameSite=Lax"
+    "SameSite=Lax"
   ].filter(Boolean);
 
   res.setHeader("Set-Cookie", cookieParts.join("; "));
@@ -130,8 +154,36 @@ function setSessionCookie(res, token) {
 
 function clearSessionCookie(res) {
   const isProduction = process.env.NODE_ENV === "production";
-  const sameSite = isProduction ? "SameSite=None; Secure" : "SameSite=Lax";
+  const sameSite = isProduction ? "SameSite=Lax; Secure" : "SameSite=Lax";
   res.setHeader("Set-Cookie", `${SESSION_COOKIE}=; Path=/; HttpOnly; Max-Age=0; ${sameSite}`);
+}
+
+function applyRateLimit(limitKey, maxRequests, windowMs) {
+  return (req, res, next) => {
+    const now = Date.now();
+    const key = `${limitKey}:${getClientIp(req)}`;
+    const existing = rateLimitStore.get(key);
+
+    if (!existing || now > existing.resetAt) {
+      rateLimitStore.set(key, {
+        count: 1,
+        resetAt: now + windowMs
+      });
+      next();
+      return;
+    }
+
+    existing.count += 1;
+    rateLimitStore.set(key, existing);
+
+    if (existing.count > maxRequests) {
+      res.setHeader("Retry-After", String(Math.ceil((existing.resetAt - now) / 1000)));
+      next(createError(429, "Хэт олон хүсэлт илгээгдсэн байна. Түр хүлээгээд дахин оролдоно уу."));
+      return;
+    }
+
+    next();
+  };
 }
 
 function getDoctorById(doctorId) {
@@ -248,6 +300,9 @@ function buildAppointmentPayload(input, existing = null) {
 
   if (!patientName) throw createError(400, "Өвчтөний нэр шаардлагатай.");
   if (!phone) throw createError(400, "Утасны дугаар шаардлагатай.");
+  if (patientName.length > 80) throw createError(400, "Өвчтөний нэр хэт урт байна.");
+  if (phone.length > 32) throw createError(400, "Утасны дугаар хэт урт байна.");
+  if (notes.length > 1000) throw createError(400, "Тайлбар хэт урт байна.");
 
   const doctor = getDoctorById(doctorId);
   if (!doctor) throw createError(400, "Эмч олдсонгүй.");
@@ -355,10 +410,11 @@ serverApp.get("/api/health", (req, res) => {
 });
 
 serverApp.get("/api/public/booking", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   res.json({ doctors: buildDoctorsResponse() });
 });
 
-serverApp.post("/api/public/requests", (req, res, next) => {
+serverApp.post("/api/public/requests", applyRateLimit("public-requests", PUBLIC_RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS), (req, res, next) => {
   try {
     const payload = buildAppointmentPayload({ ...req.body, status: "pending" });
     const now = new Date().toISOString();
@@ -389,6 +445,7 @@ serverApp.post("/api/public/requests", (req, res, next) => {
 });
 
 serverApp.get("/api/admin/session", (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   const routeValid = (req.query.id || "") === ADMIN_ROUTE_ID;
   if (!routeValid) {
     res.json({ routeValid: false, authenticated: false });
@@ -412,7 +469,7 @@ serverApp.get("/api/admin/session", (req, res) => {
   res.json({ routeValid: true, authenticated: Boolean(session) });
 });
 
-serverApp.post("/api/admin/login", (req, res, next) => {
+serverApp.post("/api/admin/login", applyRateLimit("admin-login", LOGIN_RATE_LIMIT_MAX, RATE_LIMIT_WINDOW_MS), (req, res, next) => {
   try {
     const { routeId = "", username = "", password = "" } = req.body || {};
 
@@ -420,7 +477,12 @@ serverApp.post("/api/admin/login", (req, res, next) => {
       throw createError(403, "Admin link буруу байна.");
     }
 
-    if (username.trim() !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+    const usernameValid = safeCompare(username.trim(), ADMIN_USERNAME);
+    const passwordValid = ADMIN_PASSWORD_HASH
+      ? safeCompare(hashPassword(password), ADMIN_PASSWORD_HASH)
+      : safeCompare(password, ADMIN_PASSWORD);
+
+    if (!usernameValid || !passwordValid) {
       throw createError(401, "Invalid credentials");
     }
 
@@ -450,6 +512,7 @@ serverApp.post("/api/admin/logout", requireAdmin, (req, res) => {
 });
 
 serverApp.get("/api/admin/dashboard", requireAdmin, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   const doctors = db.prepare(`
     SELECT id, name, role, branch, hours, availability, note
     FROM doctors
@@ -463,6 +526,7 @@ serverApp.get("/api/admin/dashboard", requireAdmin, (req, res) => {
 });
 
 serverApp.post("/api/admin/appointments", requireAdmin, (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
   try {
     const payload = buildAppointmentPayload(req.body || {});
     ensureNoConfirmedConflict(payload);
@@ -495,6 +559,7 @@ serverApp.post("/api/admin/appointments", requireAdmin, (req, res, next) => {
 });
 
 serverApp.patch("/api/admin/appointments/:id", requireAdmin, (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
   try {
     const existing = getAppointmentById(req.params.id);
     if (!existing) throw createError(404, "Захиалга олдсонгүй.");
@@ -526,6 +591,7 @@ serverApp.patch("/api/admin/appointments/:id", requireAdmin, (req, res, next) =>
 });
 
 serverApp.delete("/api/admin/appointments/:id", requireAdmin, (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
   try {
     const result = db.prepare("DELETE FROM appointments WHERE id = ?").run(req.params.id);
     if (!result.changes) throw createError(404, "Захиалга олдсонгүй.");
@@ -536,6 +602,7 @@ serverApp.delete("/api/admin/appointments/:id", requireAdmin, (req, res, next) =
 });
 
 serverApp.delete("/api/admin/requests/:id", requireAdmin, (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
   try {
     const result = db.prepare("DELETE FROM appointments WHERE id = ?").run(req.params.id);
     if (!result.changes) throw createError(404, "Хүсэлт олдсонгүй.");
@@ -546,11 +613,13 @@ serverApp.delete("/api/admin/requests/:id", requireAdmin, (req, res, next) => {
 });
 
 serverApp.delete("/api/admin/requests", requireAdmin, (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   db.prepare("DELETE FROM appointments").run();
   res.status(204).end();
 });
 
 serverApp.patch("/api/admin/doctors/:id", requireAdmin, (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
   try {
     const availability = req.body?.availability;
     if (!["available", "limited", "busy"].includes(availability)) {
