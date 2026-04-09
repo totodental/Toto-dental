@@ -2,7 +2,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 const Database = require("better-sqlite3");
 
-const DATA_DIR = path.join(__dirname, "data");
+const DATA_DIR = process.env.DATA_DIR
+  ? path.resolve(process.env.DATA_DIR)
+  : process.env.RENDER_DISK_PATH
+    ? path.join(process.env.RENDER_DISK_PATH, "toto-dental-data")
+    : path.join(__dirname, "data");
 const DB_PATH = path.join(DATA_DIR, "app.db");
 
 const seedDoctors = [
