@@ -6,20 +6,48 @@
       "destination": "https://toto-dental.onrender.com/api/:path*"
     },
     {
-      "source": "/",
-      "destination": "/index.html"
+      "source": "/assets/:path*",
+      "destination": "/frontend/assets/:path*"
+    },
+    {
+      "source": "/style.css",
+      "destination": "/frontend/style.css"
+    },
+    {
+      "source": "/script.js",
+      "destination": "/frontend/script.js"
+    },
+    {
+      "source": "/config.js",
+      "destination": "/frontend/config.js"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "/frontend/admin/:path*"
     },
     {
       "source": "/admin",
-      "destination": "/admin/index.html"
+      "destination": "/frontend/admin/index.html"
+    },
+    {
+      "source": "/booking/:path*",
+      "destination": "/frontend/booking/:path*"
     },
     {
       "source": "/booking",
-      "destination": "/booking/index.html"
+      "destination": "/frontend/booking/index.html"
+    },
+    {
+      "source": "/doctors/:path*",
+      "destination": "/frontend/doctors/:path*"
     },
     {
       "source": "/doctors",
-      "destination": "/doctors/index.html"
+      "destination": "/frontend/doctors/index.html"
+    },
+    {
+      "source": "/",
+      "destination": "/frontend/index.html"
     }
   ],
   "headers": [

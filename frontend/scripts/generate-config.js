@@ -4,8 +4,8 @@ const path = require("node:path");
 const root = path.join(__dirname, "..");
 const outputPath = path.join(root, "config.js");
 
-const rawApiBase = process.env.VITE_API_URL || "https://toto-dental.onrender.com/api";
-const apiBase = rawApiBase.replace(/\/+$/, "") || "https://toto-dental.onrender.com/api";
+const rawApiBase = process.env.VITE_API_URL || "/api";
+const apiBase = rawApiBase.replace(/\/+$/, "") || "/api";
 
 const content = `window.__APP_CONFIG__ = ${JSON.stringify(
   {
