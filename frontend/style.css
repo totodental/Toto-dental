@@ -33,6 +33,7 @@ body {
     radial-gradient(circle at top left, rgba(11, 142, 207, 0.16), transparent 28%),
     radial-gradient(circle at top right, rgba(244, 189, 86, 0.16), transparent 24%),
     linear-gradient(180deg, #fbfdff 0%, #eff6fb 100%);
+  animation: page-fade-in 0.55s ease both;
 }
 
 img {
@@ -101,20 +102,21 @@ a {
   padding: 10px 16px;
   border-radius: 999px;
   border: 1px solid transparent;
-  transition: color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  transition: color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
 }
 
 .nav a:hover {
   color: var(--brand-deep);
-  background: rgba(255, 255, 255, 0.56);
-  border-color: rgba(11, 74, 120, 0.1);
+  background: rgba(214, 227, 238, 0.68);
+  border-color: rgba(74, 110, 136, 0.18);
+  transform: translateY(-1px);
 }
 
 .nav a.is-active {
   color: var(--brand-deep);
-  background: rgba(255, 255, 255, 0.78);
-  border-color: rgba(11, 74, 120, 0.14);
-  box-shadow: 0 10px 24px rgba(11, 74, 120, 0.08);
+  background: rgba(196, 214, 228, 0.88);
+  border-color: rgba(70, 106, 133, 0.2);
+  box-shadow: 0 12px 28px rgba(11, 74, 120, 0.1);
   backdrop-filter: blur(14px);
 }
 
@@ -125,7 +127,7 @@ a {
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: 0.01em;
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease, border-color 0.35s ease;
 }
 
 .call-btn,
@@ -146,6 +148,48 @@ a {
 .primary-btn:hover,
 .secondary-btn:hover {
   transform: translateY(-2px);
+}
+
+.hero-media-card,
+.doctor-profile-card,
+.gallery-card,
+.service-card,
+.feature-copy-card,
+.branch-card,
+.contact-card,
+.contact-addresses,
+.team-story,
+.team-stat-card {
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+}
+
+.hero-media-card:hover,
+.doctor-profile-card:hover,
+.gallery-card:hover,
+.service-card:hover,
+.feature-copy-card:hover,
+.branch-card:hover,
+.contact-card:hover,
+.contact-addresses:hover,
+.team-story:hover,
+.team-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px rgba(17, 74, 120, 0.08);
+}
+
+.hero-media-card img,
+.doctor-profile-media img,
+.gallery-card img,
+.feature-visual img {
+  transition: transform 0.75s ease, filter 0.55s ease;
+}
+
+.hero-media-card:hover img,
+.doctor-profile-card:hover .doctor-profile-media img,
+.gallery-card:hover img,
+.feature-visual:hover img {
+  transform: scale(1.02);
+  filter: saturate(1.03);
 }
 
 .hero,
@@ -1075,6 +1119,17 @@ a {
 
 .delay-3 {
   transition-delay: 0.24s;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 1440px) {
