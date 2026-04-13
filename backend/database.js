@@ -2,12 +2,21 @@ const fs = require("node:fs");
 const path = require("node:path");
 const Database = require("better-sqlite3");
 
-const DATA_DIR = process.env.DATA_DIR
-  ? path.resolve(process.env.DATA_DIR)
-  : process.env.RENDER_DISK_PATH
-    ? path.join(process.env.RENDER_DISK_PATH, "toto-dental-data")
-    : path.join(__dirname, "data");
-const DB_PATH = path.join(DATA_DIR, "app.db");
+const SQLITE_DB_PATH = process.env.SQLITE_DB_PATH
+  ? path.resolve(process.env.SQLITE_DB_PATH)
+  : "";
+
+const DATA_DIR = SQLITE_DB_PATH
+  ? path.dirname(SQLITE_DB_PATH)
+  : process.env.DATA_DIR
+    ? path.resolve(process.env.DATA_DIR)
+    : process.env.RAILWAY_VOLUME_MOUNT_PATH
+      ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "toto-dental-data")
+      : process.env.VOLUME_MOUNT_PATH
+        ? path.join(process.env.VOLUME_MOUNT_PATH, "toto-dental-data")
+        : path.join(__dirname, "data");
+
+const DB_PATH = SQLITE_DB_PATH || path.join(DATA_DIR, "app.db");
 
 const seedDoctors = [
   {
@@ -17,7 +26,7 @@ const seedDoctors = [
     branch: "Салбар 1",
     hours: "Даваа-Баасан · 10:00-18:00",
     availability: "available",
-    note: "Гажиг заслын оношилгоо, аппаратын хяналт, урт хугацааны төлөвлөгөө."
+    note: "Гажиг заслын оношилгоо, аппаратын хяналт, урт хугацааны эмчилгээний төлөвлөгөөг боловсруулан ажиллана."
   },
   {
     id: "lkhagvadorj",
@@ -26,7 +35,7 @@ const seedDoctors = [
     branch: "Салбар 2",
     hours: "Мягмар, Пүрэв, Бямба · 10:00-18:00",
     availability: "limited",
-    note: "Нүүр амны мэс заслын үзлэг, шүд авалт, мэс заслын зөвлөгөө."
+    note: "Нүүр амны мэс заслын үзлэг, шүд авалт, мэс заслын зөвлөгөө, дараах хяналтыг хариуцна."
   },
   {
     id: "mandakhnaran",
@@ -35,7 +44,7 @@ const seedDoctors = [
     branch: "Салбар 1",
     hours: "Даваа-Бямба · 11:00-18:00",
     availability: "available",
-    note: "Анатомын бүтэц дагасан байгалийн мэт ломбо, шүд цоорох өвчлөлийн нарийн эмчилгээ."
+    note: "Шүд цоорох өвчлөлийн нарийн эмчилгээ, анатомын бүтцэд нийцсэн ломбо, нөхөн сэргээх эмчилгээг хийнэ."
   }
 ];
 
@@ -48,16 +57,15 @@ const legacyDoctorMap = {
 function generateSlots(days = 3, startHour = 8, endHour = 18) {
   const slots = [];
 
-  for (let d = 0; d < days; d += 1) {
+  for (let dayOffset = 0; dayOffset < days; dayOffset += 1) {
     const date = new Date();
-    date.setDate(date.getDate() + d);
+    date.setDate(date.getDate() + dayOffset);
 
     const label = date.toLocaleDateString("mn-MN", { weekday: "long" });
     const dateStr = date.toISOString().split("T")[0];
 
-    for (let h = startHour; h < endHour; h += 1) {
-      const time = `${String(h).padStart(2, "0")}:00`;
-
+    for (let hour = startHour; hour < endHour; hour += 1) {
+      const time = `${String(hour).padStart(2, "0")}:00`;
       slots.push({
         label,
         date: dateStr,
@@ -147,20 +155,23 @@ function initDatabase() {
     VALUES (@doctor_id, @label, @slot_date, @slot_time)
   `);
 
+  const migrateLegacyAppointments = db.prepare(`
+    UPDATE appointments
+    SET doctor_id = ?, updated_at = ?
+    WHERE doctor_id = ?
+  `);
+
+  const deleteDoctor = db.prepare("DELETE FROM doctors WHERE id = ?");
+
   const syncSeedData = db.transaction(() => {
     seedDoctors.forEach((doctor) => {
       upsertDoctor.run(doctor);
     });
 
     Object.entries(legacyDoctorMap).forEach(([legacyId, nextId]) => {
-      db.prepare(`
-        UPDATE appointments
-        SET doctor_id = ?, updated_at = ?
-        WHERE doctor_id = ?
-      `).run(nextId, new Date().toISOString(), legacyId);
-
+      migrateLegacyAppointments.run(nextId, new Date().toISOString(), legacyId);
       deleteDoctorSlots.run(legacyId);
-      db.prepare("DELETE FROM doctors WHERE id = ?").run(legacyId);
+      deleteDoctor.run(legacyId);
     });
 
     seedDoctors.forEach((doctor) => {
