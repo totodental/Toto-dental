@@ -40,7 +40,7 @@ function createAdminController({
     const doctor = doctorModel.getById(doctorId);
     if (!doctor) throw createError(400, "Эмч олдсонгүй.");
 
-    if (!["pending", "confirmed", "cancelled", "completed"].includes(status)) {
+    if (!["pending", "confirmed", "cancelled", "completed", "archived"].includes(status)) {
       throw createError(400, "Төлөв буруу байна.");
     }
 
@@ -153,7 +153,7 @@ function createAdminController({
     deleteAppointment(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
-        const result = appointmentModel.deleteById(req.params.id);
+        const result = appointmentModel.archiveById(req.params.id, new Date().toISOString());
         if (!result.changes) throw createError(404, "Захиалга олдсонгүй.");
         res.status(204).end();
       } catch (error) {
@@ -164,7 +164,7 @@ function createAdminController({
     deleteRequest(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
-        const result = appointmentModel.deleteById(req.params.id);
+        const result = appointmentModel.archiveById(req.params.id, new Date().toISOString());
         if (!result.changes) throw createError(404, "Хүсэлт олдсонгүй.");
         res.status(204).end();
       } catch (error) {
@@ -174,7 +174,7 @@ function createAdminController({
 
     deleteAllRequests(req, res) {
       res.setHeader("Cache-Control", "no-store");
-      appointmentModel.deleteAll();
+      appointmentModel.archiveAll(new Date().toISOString());
       res.status(204).end();
     },
 

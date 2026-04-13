@@ -87,6 +87,7 @@ async function initAdmin() {
     if (status === "confirmed") return "Баталгаажсан";
     if (status === "cancelled") return "Цуцалсан";
     if (status === "completed") return "Дууссан";
+    if (status === "archived") return "Түүхэнд хадгалсан";
     return "Хүлээгдэж буй";
   };
 
@@ -247,7 +248,7 @@ async function initAdmin() {
                   <button class="ghost-btn" type="button" data-action="confirm" data-id="${request.id}">Батлах</button>
                   <button class="ghost-btn" type="button" data-action="edit" data-id="${request.id}">Өөрчлөх</button>
                   <button class="ghost-btn" type="button" data-action="reject" data-id="${request.id}">Цуцлах</button>
-                  <button class="ghost-btn" type="button" data-action="delete" data-id="${request.id}">Устгах</button>
+                  <button class="ghost-btn" type="button" data-action="delete" data-id="${request.id}">Түүхлэх</button>
                 </div>
               </article>
             `;
@@ -469,7 +470,7 @@ async function initAdmin() {
 
   editorDelete.addEventListener("click", async () => {
     if (!selectedAppointmentId) {
-      editorFeedback.textContent = "Устгах захиалга сонгогдоогүй байна.";
+      editorFeedback.textContent = "Түүхлэх захиалга сонгогдоогүй байна.";
       return;
     }
 
@@ -477,7 +478,7 @@ async function initAdmin() {
       await requestJson(`/admin/appointments/${selectedAppointmentId}`, { method: "DELETE" });
       await loadDashboard();
       resetEditor(editorDate.value);
-      editorFeedback.textContent = "Захиалга устгагдлаа.";
+      editorFeedback.textContent = "Захиалга түүхэнд хадгалагдлаа.";
     } catch (error) {
       editorFeedback.textContent = error.message;
     }
@@ -540,13 +541,14 @@ async function initAdmin() {
   });
 
   clearRequests.addEventListener("click", async () => {
-    const confirmed = window.confirm("Та итгэлтэй байна уу? Бүх хүсэлтүүд бүрэн цэвэрлэгдэнэ.");
+    const confirmed = window.confirm("Та итгэлтэй байна уу? Бүх хүсэлтүүд түүхэнд хадгалагдаж, идэвхтэй жагсаалтаас гарна.");
     if (!confirmed) return;
 
     try {
       await requestJson("/admin/requests", { method: "DELETE" });
       await loadDashboard();
       resetEditor(editorDate.value);
+      editorFeedback.textContent = "Хүсэлтүүд түүхэнд хадгалагдлаа.";
     } catch (error) {
       editorFeedback.textContent = error.message;
     }

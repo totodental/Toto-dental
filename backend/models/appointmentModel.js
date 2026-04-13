@@ -32,8 +32,16 @@ function createAppointmentModel(db) {
     SET patient_name = ?, phone = ?, doctor_id = ?, branch = ?, appointment_date = ?, appointment_time = ?, notes = ?, status = ?, updated_at = ?
     WHERE id = ?
   `);
-  const deleteByIdStmt = db.prepare(`DELETE FROM appointments WHERE id = ?`);
-  const deleteAllStmt = db.prepare(`DELETE FROM appointments`);
+  const archiveByIdStmt = db.prepare(`
+    UPDATE appointments
+    SET status = 'archived', updated_at = ?
+    WHERE id = ?
+  `);
+  const archiveAllStmt = db.prepare(`
+    UPDATE appointments
+    SET status = 'archived', updated_at = ?
+    WHERE status != 'archived'
+  `);
   const confirmedConflictStmt = db.prepare(`
     SELECT id
     FROM appointments
@@ -92,11 +100,11 @@ function createAppointmentModel(db) {
         id
       );
     },
-    deleteById(id) {
-      return deleteByIdStmt.run(id);
+    archiveById(id, now) {
+      return archiveByIdStmt.run(now, id);
     },
-    deleteAll() {
-      return deleteAllStmt.run();
+    archiveAll(now) {
+      return archiveAllStmt.run(now);
     },
     getConfirmedConflict(doctorId, date, time, ignoreId = "") {
       return confirmedConflictStmt.get(doctorId, date, time, ignoreId || "");

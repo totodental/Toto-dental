@@ -185,6 +185,10 @@
   border-left-color: #bf3535;
 }
 
+.day-detail-item.archived {
+  border-left-color: #7b8ba1;
+}
+
 @media (max-width: 900px) {
   .day-detail-item {
     grid-template-columns: 1fr;
@@ -277,6 +281,11 @@
   color: #8a2f2f;
 }
 
+.calendar-event.archived {
+  background: rgba(123, 139, 161, 0.14);
+  color: #4d627a;
+}
+
 .calendar-event.is-selected {
   border-color: rgba(11, 142, 207, 0.35);
   box-shadow: 0 10px 26px rgba(11, 74, 120, 0.12);
@@ -363,6 +372,10 @@
 
 .request-card.request-cancelled {
   border-color: rgba(191, 53, 53, 0.22);
+}
+
+.request-card.request-archived {
+  border-color: rgba(123, 139, 161, 0.24);
 }
 
 .request-meta,
