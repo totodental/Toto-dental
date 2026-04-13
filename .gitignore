@@ -3,6 +3,7 @@ Thumbs.db
 Desktop.ini
 .vercel
 node_modules
+backend/node_modules
 data/store.json
 backend/data/app.db
 backend/data/app.db-shm

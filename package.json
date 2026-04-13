@@ -1,0 +1,10 @@
+{
+  "name": "toto-dental-root",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Root deployment helpers for Toto Dental",
+  "scripts": {
+    "build": "node frontend/scripts/generate-config.js",
+    "test": "node -c backend/server.js"
+  }
+}

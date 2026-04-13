@@ -5,7 +5,9 @@ const root = path.join(__dirname, "..");
 const outputPath = path.join(root, "config.js");
 
 const rawApiBase = process.env.VITE_API_URL || "/api";
-const apiBase = rawApiBase.replace(/\/+$/, "") || "/api";
+const apiBase = /^https?:\/\//i.test(rawApiBase)
+  ? "/api"
+  : (rawApiBase.replace(/\/+$/, "") || "/api");
 
 const content = `window.__APP_CONFIG__ = ${JSON.stringify(
   {
