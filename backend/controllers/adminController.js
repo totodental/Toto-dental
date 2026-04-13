@@ -91,7 +91,7 @@ function createAdminController({
           : authHelpers.safeCompare(password, config.adminPassword);
 
         if (!usernameValid || !passwordValid) {
-          throw createError(401, "Invalid credentials");
+          throw createError(401, "Нэвтрэх нэр эсвэл нууц үг буруу байна.");
         }
 
         const token = authHelpers.createSessionToken();

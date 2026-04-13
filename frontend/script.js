@@ -163,6 +163,7 @@ async function initBooking() {
 
   const renderDoctors = () => {
     if (!doctorGrid) return;
+
     doctorGrid.innerHTML = getFilteredDoctors()
       .map(
         (doctor) => `
@@ -186,7 +187,11 @@ async function initBooking() {
   const renderScheduler = () => {
     const filteredDoctors = getFilteredDoctors();
     const doctor = filteredDoctors.find((item) => item.id === activeDoctorId) || filteredDoctors[0];
-    if (!doctor) return;
+    if (!doctor) {
+      selectedDoctor.innerHTML = "";
+      slotCalendar.innerHTML = "";
+      return;
+    }
 
     selectedDoctor.innerHTML = `
       <article class="selected-card selected-${doctor.availability}">
