@@ -1,40 +1,52 @@
 # Toto Dental
 
-Refactored structure:
+Production structure:
 
-- `backend/` Express API, SQLite database, routes, controllers, models
+- `backend/` Express API, persistent database layer, routes, controllers, models
 - `frontend/` static website, booking UI, admin panel, doctors page, assets
 
 ## Backend local development
 
 ```powershell
-cd "\backend"
+cd ".\backend"
 npm install
 node server.js
 ```
 
-Open `http://127.0.0.1:3000`.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
 
-## Backend deployment on Render
+## Backend deployment on Railway
 
-Use `backend/` as the Render root directory.
+Use `backend/` as the Railway root directory.
 
 - Install command: `npm install`
 - Start command: `node server.js`
 
-To keep appointments and reception calendar data after redeploy/restart, mount a Render Persistent Disk and set:
+Recommended environment variables:
 
 ```bash
-RENDER_DISK_PATH=/var/data
+PORT=3000
+SESSION_SECRET=change-this-secret
+ADMIN_ROUTE_ID=your-private-admin-route
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=strong-password
+FRONTEND_ORIGINS=https://toto-dental.vercel.app,https://toto-dental-hjbv.vercel.app
+RAILWAY_VOLUME_MOUNT_PATH=/data
 ```
 
-The backend will automatically store SQLite at:
+To keep appointments and reception calendar data after redeploy/restart, attach a Railway volume. The backend will automatically store SQLite under:
 
 ```bash
-/var/data/toto-dental-data/app.db
+/data/toto-dental-data/app.db
 ```
 
-You can also override the database folder manually:
+You can also override storage manually:
+
+```bash
+SQLITE_DB_PATH=/absolute/path/to/app.db
+```
+
+or
 
 ```bash
 DATA_DIR=/absolute/path/to/storage
@@ -46,17 +58,27 @@ Use `frontend/` as the Vercel root directory.
 
 - Root Directory: `frontend`
 - Build Command: `npm run build`
+- Output Directory: `dist`
 
-Environment variable:
+The frontend uses `/api` and Vercel rewrites requests to Railway.
+
+## Supabase-ready migration
+
+If you want to replace SQLite with Supabase Postgres later, the repo now supports a clean migration path. Create the schema from:
+
+- `backend/sql/supabase-schema.sql`
+
+Recommended future variables:
 
 ```bash
-VITE_API_URL=https://toto-dental.onrender.com/api
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_DB_URL=
 ```
 
-## One-click style deployment files
+## Included deployment files
 
-This repo now includes:
-
-- `render.yaml` for Render backend deployment
-- `frontend/vercel.json` for Vercel frontend routing/headers
-- `frontend/package.json` for Vercel build step
+- `render.yaml` legacy Render blueprint
+- `frontend/vercel.json` Vercel frontend routing and headers
+- `frontend/package.json` frontend build step

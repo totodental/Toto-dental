@@ -1,0 +1,53 @@
+create table if not exists doctors (
+  id text primary key,
+  name text not null,
+  title text not null,
+  description text not null,
+  branch text not null,
+  schedule text not null,
+  availability text not null default 'available',
+  highlight_note text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists doctor_slots (
+  id bigserial primary key,
+  doctor_id text not null references doctors(id) on delete cascade,
+  slot_date date not null,
+  label text not null,
+  slot_time text not null
+);
+
+create index if not exists idx_doctor_slots_doctor_date
+  on doctor_slots (doctor_id, slot_date, slot_time);
+
+create table if not exists appointments (
+  id text primary key,
+  patient_name text not null,
+  phone text not null,
+  doctor_id text not null references doctors(id),
+  branch text not null,
+  appointment_date date not null,
+  appointment_time text not null,
+  notes text not null default '',
+  status text not null default 'pending',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists idx_appointments_schedule
+  on appointments (doctor_id, appointment_date, appointment_time);
+
+create unique index if not exists idx_appointments_unique_live
+  on appointments (doctor_id, appointment_date, appointment_time)
+  where status in ('confirmed', 'completed');
+
+create table if not exists admin_sessions (
+  token text primary key,
+  signature text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_admin_sessions_created_at
+  on admin_sessions (created_at);

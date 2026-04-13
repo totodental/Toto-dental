@@ -1,3 +1,4 @@
+const crypto = require("node:crypto");
 const { createError, normalizeDate, normalizeTime } = require("../utils/http");
 
 function createAdminController({
@@ -82,7 +83,7 @@ function createAdminController({
         const { routeId = "", username = "", password = "" } = req.body || {};
 
         if (routeId !== config.adminRouteId) {
-          throw createError(403, "Admin link буруу байна.");
+          throw createError(403, "Admin холбоос буруу байна.");
         }
 
         const usernameValid = authHelpers.safeCompare(username.trim(), config.adminUsername);
@@ -127,7 +128,7 @@ function createAdminController({
         const payload = buildAppointmentPayload(req.body || {});
         ensureNoConfirmedConflict(payload);
         const now = new Date().toISOString();
-        const id = require("node:crypto").randomUUID();
+        const id = crypto.randomUUID();
         appointmentModel.create(id, payload, now);
         res.status(201).json({ ok: true, appointment: appointmentModel.getById(id) });
       } catch (error) {
