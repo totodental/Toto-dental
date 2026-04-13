@@ -8,6 +8,13 @@ function createAdminController({
   sessionModel,
   authHelpers
 }) {
+  function archiveAppointment(id, notFoundMessage) {
+    const result = appointmentModel.archiveById(id, new Date().toISOString());
+    if (!result.changes) {
+      throw createError(404, notFoundMessage);
+    }
+  }
+
   function ensureNoConfirmedConflict(payload, ignoreId = "") {
     if (!["confirmed", "completed"].includes(payload.status)) return;
 
@@ -154,8 +161,7 @@ function createAdminController({
     deleteAppointment(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
-        const result = appointmentModel.archiveById(req.params.id, new Date().toISOString());
-        if (!result.changes) throw createError(404, "Захиалга олдсонгүй.");
+        archiveAppointment(req.params.id, "Захиалга олдсонгүй.");
         res.status(204).end();
       } catch (error) {
         next(error);
@@ -165,8 +171,7 @@ function createAdminController({
     deleteRequest(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
-        const result = appointmentModel.archiveById(req.params.id, new Date().toISOString());
-        if (!result.changes) throw createError(404, "Хүсэлт олдсонгүй.");
+        archiveAppointment(req.params.id, "Хүсэлт олдсонгүй.");
         res.status(204).end();
       } catch (error) {
         next(error);

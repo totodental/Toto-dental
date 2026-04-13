@@ -57,12 +57,6 @@ function createAppointmentModel(db) {
     FROM appointments
     WHERE status IN ('confirmed', 'completed')
   `);
-  const migrateDoctorStmt = db.prepare(`
-    UPDATE appointments
-    SET doctor_id = ?, updated_at = ?
-    WHERE doctor_id = ?
-  `);
-
   return {
     listAll() {
       return listStmt.all().map(mapAppointment);
@@ -111,9 +105,6 @@ function createAppointmentModel(db) {
     },
     getBookedSlots() {
       return bookedSlotsStmt.all();
-    },
-    migrateDoctor(legacyId, nextId, updatedAt) {
-      migrateDoctorStmt.run(nextId, updatedAt, legacyId);
     }
   };
 }
