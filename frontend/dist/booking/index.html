@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+    content="
+      default-src 'self';
+      script-src 'self';
+      style-src 'self';
+      img-src 'self' data:;
+      font-src 'self' data:;
+      connect-src 'self';
+      object-src 'none';
+      frame-ancestors 'none';
+      base-uri 'self';
+      form-action 'self';
+      upgrade-insecure-requests;
+    ">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <title>Toto Dental | Цаг захиалах</title>
+  <meta name="theme-color" content="#0b8ecf">
+  <meta name="description" content="Toto Dental эмчийн цаг захиалга">
+  <link rel="icon" href="/assets/logo.jpg">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="../assets/logo.jpg" alt="Toto Dental лого">
+      <span>Toto Dental</span>
+    </a>
+    <nav class="nav">
+      <a href="/#services">Үйлчилгээ</a>
+      <a href="/#feature">Онцлох</a>
+      <a href="/doctors/">Эмч нар</a>
+      <a href="/#team">Бидний тухай</a>
+      <a href="/booking/">Цаг захиалах</a>
+      <a href="/#contact">Холбоо барих</a>
+    </nav>
+    <a class="call-btn" href="tel:77551595">☎ 7755-1595</a>
+  </header>
+
+  <main>
+    <section class="booking section" id="booking">
+      <div class="section-heading">
+        <p class="eyebrow">Цаг захиалга</p>
+        <h2>Эмчээ сонгоод өөрт тохирох цагаа хүсэлтээр илгээнэ</h2>
+      </div>
+      <div class="booking-layout">
+        <div class="booking-stack reveal">
+          <section class="booking-panel patient-panel">
+            <div class="panel-head">
+              <div>
+                <p class="panel-kicker">Онлайн бүртгэл</p>
+                <h3>Үзлэгийн цагийн хүсэлт илгээх</h3>
+              </div>
+              <span class="panel-chip">Хурдан, хялбар, ойлгомжтой</span>
+            </div>
+            <div class="scheduler-shell">
+              <div class="scheduler-toolbar">
+                <label class="scheduler-picker">
+                  Салбар сонгох
+                  <select name="branchFilter" id="branch-picker">
+                    <option value="Салбар 1">Салбар 1</option>
+                    <option value="Салбар 2">Салбар 2</option>
+                  </select>
+                </label>
+                <label class="scheduler-picker">
+                  Эмч сонгох
+                  <select name="doctorIdMirror" id="doctor-picker"></select>
+                </label>
+                <div class="scheduler-legend">
+                  <span><i class="dot available"></i> Завтай</span>
+                  <span><i class="dot limited"></i> Хязгаартай</span>
+                  <span><i class="dot busy"></i> Завгүй</span>
+                </div>
+              </div>
+              <div class="selected-doctor" id="selected-doctor"></div>
+              <div class="slot-calendar" id="slot-calendar"></div>
+            </div>
+            <form class="patient-form" id="patient-form">
+              <label>
+                Нэр
+                <input type="text" name="patientName" placeholder="Өөрийн нэрээ оруулна уу" required>
+              </label>
+              <label>
+                Утас
+                <input type="tel" name="phone" placeholder="Жишээ: 9911-2233" required>
+              </label>
+              <label>
+                Эмч
+                <select name="doctorId" id="doctor-select" required></select>
+              </label>
+              <label>
+                Салбар
+                <select name="branch" id="branch-select" required>
+                  <option value="Салбар 1">Салбар 1</option>
+                  <option value="Салбар 2">Салбар 2</option>
+                </select>
+              </label>
+              <label>
+                Хүссэн өдөр
+                <input type="date" name="date" required>
+              </label>
+              <label>
+                Хүссэн цаг
+                <input type="time" name="time" required>
+              </label>
+              <label class="full">
+                Үйлчилгээ / тайлбар
+                <textarea name="notes" rows="4" placeholder="Жишээ: анхны үзлэг, аппаратын хяналт, өвдөлт, цоорлын эмчилгээ"></textarea>
+              </label>
+              <button class="primary-btn submit-btn" type="submit">Хүсэлт илгээх</button>
+            </form>
+            <div class="form-response" id="form-response" hidden></div>
+          </section>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <img src="../assets/logo.jpg" alt="Toto Dental лого">
+    <div>
+      <strong>Toto Dental</strong>
+      <p>Эрүүл шүд, итгэлтэй инээмсэглэлийн төлөө</p>
+    </div>
+    <a href="tel:77551595">7755-1595</a>
+  </footer>
+
+  <script src="../config.js"></script>
+  <script src="../script.js"></script>
+</body>
+</html>

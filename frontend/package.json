@@ -4,7 +4,7 @@
   "private": true,
   "description": "Static frontend for Toto Dental",
   "scripts": {
-    "build": "node scripts/generate-config.js",
+    "build": "node scripts/build-static.js",
     "test": "node scripts/generate-config.js"
   }
 }
