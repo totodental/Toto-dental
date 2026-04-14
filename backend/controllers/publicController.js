@@ -25,9 +25,12 @@ function createPublicController({ doctorModel, appointmentModel }) {
           });
         }
 
-        if (!bookedSet.has(`${doctor.id}|${slot.slot_date}|${slot.slot_time}`)) {
-          grouped.get(key).times.push(slot.slot_time);
-        }
+        const isBooked = bookedSet.has(`${doctor.id}|${slot.slot_date}|${slot.slot_time}`);
+        grouped.get(key).times.push({
+          value: slot.slot_time,
+          isBooked,
+          state: isBooked ? "booked" : doctor.availability === "limited" ? "limited" : "available"
+        });
       });
 
       return {

@@ -13,6 +13,7 @@
   --radius-md: 22px;
   --font-body: "Segoe UI", "Arial", "Helvetica Neue", sans-serif;
   --font-display: "Segoe UI Semibold", "Segoe UI", "Arial", sans-serif;
+  --anchor-offset: 118px;
 }
 
 * {
@@ -21,6 +22,11 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: var(--anchor-offset);
+}
+
+main > [id] {
+  scroll-margin-top: var(--anchor-offset);
 }
 
 body {
@@ -773,6 +779,7 @@ a {
 
 .dot.available { background: #1c945e; }
 .dot.limited { background: #d39616; }
+.dot.booked { background: #9b4de0; }
 .dot.busy { background: #bf3535; }
 
 .selected-card {
@@ -854,6 +861,12 @@ a {
 .slot-btn.limited {
   background: rgba(211, 150, 22, 0.14);
   color: #8a5a00;
+}
+
+.slot-btn.booked {
+  background: rgba(155, 77, 224, 0.14);
+  color: #6c35a0;
+  cursor: not-allowed;
 }
 
 .slot-btn.busy,
@@ -1198,6 +1211,10 @@ a {
 }
 
 @media (max-width: 720px) {
+  :root {
+    --anchor-offset: 156px;
+  }
+
   .topbar {
     flex-wrap: wrap;
     justify-content: center;

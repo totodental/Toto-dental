@@ -49,7 +49,7 @@ function initNavHighlight() {
     .filter(Boolean);
 
   if (!sections.length) {
-    setActive((link) => normalizeHref(link.href).path === "/");
+    setActive((link) => normalizeHref(link.href).path === "/" && !normalizeHref(link.href).hash);
     return;
   }
 
@@ -132,17 +132,36 @@ async function initBooking() {
     return;
   }
 
-  const data = await requestJson("/public/booking");
-  const doctors = data.doctors || [];
-  const requestedDoctor = doctors.find((doctor) => doctor.id === requestedDoctorId);
-  let activeBranch = requestedDoctor?.branch || doctors[0]?.branch || "Салбар 1";
-  let activeDoctorId =
-    requestedDoctor?.id ||
-    doctors.find((doctor) => doctor.branch === activeBranch)?.id ||
-    doctors[0]?.id ||
-    "";
+  let doctors = [];
+  let activeBranch = "Салбар 1";
+  let activeDoctorId = "";
 
   const getFilteredDoctors = () => doctors.filter((doctor) => doctor.branch === activeBranch);
+  const getDoctorById = (doctorId) => doctors.find((doctor) => doctor.id === doctorId);
+  const getCurrentDoctor = () => {
+    const filteredDoctors = getFilteredDoctors();
+    return filteredDoctors.find((doctor) => doctor.id === activeDoctorId) || filteredDoctors[0] || null;
+  };
+
+  const clearSelectedTime = () => {
+    patientForm.querySelector('input[name="date"]').value = "";
+    patientForm.querySelector('input[name="time"]').value = "";
+  };
+
+  const isSelectedSlotAvailable = () => {
+    const selectedDate = patientForm.querySelector('input[name="date"]').value;
+    const selectedTime = patientForm.querySelector('input[name="time"]').value;
+
+    if (!selectedDate || !selectedTime) return true;
+
+    const doctor = getDoctorById(activeDoctorId);
+    if (!doctor || doctor.availability === "busy") return false;
+
+    return doctor.slots.some((slot) =>
+      slot.date === selectedDate &&
+      slot.times.some((time) => time.value === selectedTime && !time.isBooked)
+    );
+  };
 
   const syncFormAvailability = (doctor) => {
     const isBusy = doctor?.availability === "busy";
@@ -156,8 +175,7 @@ async function initBooking() {
     }
 
     if (isBusy) {
-      dateInput.value = "";
-      timeInput.value = "";
+      clearSelectedTime();
       formResponse.hidden = false;
       formResponse.textContent = "Reception энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул онлайн хүсэлт түр хаагдсан байна.";
       return;
@@ -211,8 +229,7 @@ async function initBooking() {
   };
 
   const renderScheduler = () => {
-    const filteredDoctors = getFilteredDoctors();
-    const doctor = filteredDoctors.find((item) => item.id === activeDoctorId) || filteredDoctors[0];
+    const doctor = getCurrentDoctor();
     if (!doctor) {
       selectedDoctor.innerHTML = "";
       slotCalendar.innerHTML = "";
@@ -265,14 +282,15 @@ async function initBooking() {
                 .map(
                   (time) => `
                     <button
-                      class="slot-btn ${doctor.availability}"
+                      class="slot-btn ${time.state}"
                       type="button"
                       data-doctor="${doctor.id}"
                       data-date="${slot.date}"
-                      data-time="${time}"
-                      ${doctor.availability === "busy" ? "disabled" : ""}
+                      data-time="${time.value}"
+                      ${time.isBooked ? "disabled" : ""}
+                      title="${time.isBooked ? "Энэ цаг аль хэдийн захиалагдсан." : "Энэ цагийг сонгоно."}"
                     >
-                      ${time}
+                      ${time.value}${time.isBooked ? " · Захиалагдсан" : ""}
                     </button>
                   `
                 )
@@ -284,43 +302,89 @@ async function initBooking() {
       .join("");
   };
 
-  renderOptions();
-  renderDoctors();
-  renderScheduler();
+  const syncSelectionFeedback = () => {
+    const doctor = getCurrentDoctor();
+    if (!doctor || doctor.availability === "busy") {
+      clearSelectedTime();
+      return;
+    }
 
-  branchPicker.addEventListener("change", (event) => {
-    activeBranch = event.target.value;
+    if (isSelectedSlotAvailable()) return;
+
+    clearSelectedTime();
+    formResponse.hidden = false;
+    formResponse.textContent = "Сонгосон цаг энэ хооронд захиалагдсан эсвэл эмчийн төлөв өөрчлөгдсөн тул өөр цаг сонгоно уу.";
+  };
+
+  const renderAll = () => {
     renderOptions();
     renderDoctors();
     renderScheduler();
+    syncSelectionFeedback();
+  };
+
+  const refreshBookingData = async ({ preserveAutoMessage = true } = {}) => {
+    const data = await requestJson("/public/booking");
+    const nextDoctors = data.doctors || [];
+    const requestedDoctor = nextDoctors.find((doctor) => doctor.id === requestedDoctorId);
+
+    doctors = nextDoctors;
+    activeBranch =
+      nextDoctors.find((doctor) => doctor.id === activeDoctorId)?.branch ||
+      requestedDoctor?.branch ||
+      nextDoctors[0]?.branch ||
+      activeBranch ||
+      "Салбар 1";
+    activeDoctorId =
+      nextDoctors.find((doctor) => doctor.id === activeDoctorId)?.id ||
+      requestedDoctor?.id ||
+      nextDoctors.find((doctor) => doctor.branch === activeBranch)?.id ||
+      nextDoctors[0]?.id ||
+      "";
+
+    renderAll();
+
+    if (!preserveAutoMessage && formResponse.textContent.includes("Сонгосон цаг")) {
+      formResponse.hidden = true;
+      formResponse.textContent = "";
+    }
+  };
+
+  await refreshBookingData();
+
+  branchPicker.addEventListener("change", (event) => {
+    activeBranch = event.target.value;
+    renderAll();
   });
 
   branchSelect.addEventListener("change", (event) => {
     activeBranch = event.target.value;
     branchPicker.value = activeBranch;
-    renderOptions();
-    renderDoctors();
-    renderScheduler();
+    renderAll();
   });
 
   doctorPicker.addEventListener("change", (event) => {
     activeDoctorId = event.target.value;
     doctorSelect.value = activeDoctorId;
     renderScheduler();
+    syncSelectionFeedback();
   });
 
   doctorSelect.addEventListener("change", (event) => {
     activeDoctorId = event.target.value;
     doctorPicker.value = activeDoctorId;
     renderScheduler();
+    syncSelectionFeedback();
   });
 
   slotCalendar.addEventListener("click", (event) => {
     const target = event.target;
-    if (!(target instanceof HTMLElement) || !target.classList.contains("slot-btn")) return;
+    if (!(target instanceof HTMLElement) || !target.classList.contains("slot-btn") || target.hasAttribute("disabled")) {
+      return;
+    }
 
     activeDoctorId = target.dataset.doctor || activeDoctorId;
-    const selectedDoctorData = doctors.find((doctor) => doctor.id === activeDoctorId);
+    const selectedDoctorData = getDoctorById(activeDoctorId);
     if (selectedDoctorData) {
       activeBranch = selectedDoctorData.branch;
       branchPicker.value = activeBranch;
@@ -340,7 +404,7 @@ async function initBooking() {
   patientForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(patientForm);
-    const selectedDoctorData = doctors.find((doctor) => doctor.id === formData.get("doctorId"));
+    const selectedDoctorData = getDoctorById(formData.get("doctorId"));
 
     try {
       if (selectedDoctorData?.availability === "busy") {
@@ -365,11 +429,29 @@ async function initBooking() {
       branchSelect.value = activeBranch;
       doctorSelect.value = activeDoctorId;
       doctorPicker.value = activeDoctorId;
+      await refreshBookingData({ preserveAutoMessage: false });
       formResponse.hidden = false;
       formResponse.textContent = "Цагийн хүсэлт амжилттай илгээгдлээ. Reception шалгаад баталгаажуулна.";
     } catch (error) {
       formResponse.hidden = false;
       formResponse.textContent = error.message;
+    }
+  });
+
+  const triggerRefresh = async () => {
+    try {
+      await refreshBookingData();
+    } catch (error) {
+      formResponse.hidden = false;
+      formResponse.textContent = error.message;
+    }
+  };
+
+  window.setInterval(triggerRefresh, 15000);
+  window.addEventListener("focus", triggerRefresh);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      triggerRefresh();
     }
   });
 }
