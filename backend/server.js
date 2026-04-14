@@ -15,6 +15,27 @@ const { createAdminRoutes } = require("./routes/adminRoutes");
 async function startServer() {
   const config = getConfig();
   const database = await initDatabase();
+  const bookingCache = {
+    ttlMs: 5000,
+    entry: null,
+    get() {
+      if (!this.entry) return null;
+      if (Date.now() > this.entry.expiresAt) {
+        this.entry = null;
+        return null;
+      }
+      return this.entry.value;
+    },
+    set(value) {
+      this.entry = {
+        value,
+        expiresAt: Date.now() + this.ttlMs
+      };
+    },
+    invalidate() {
+      this.entry = null;
+    }
+  };
 
   const doctorModel = createDoctorModel(database);
   const appointmentModel = createAppointmentModel(database);
@@ -24,7 +45,8 @@ async function startServer() {
 
   const publicController = createPublicController({
     doctorModel,
-    appointmentModel
+    appointmentModel,
+    bookingCache
   });
 
   const adminController = createAdminController({
@@ -32,7 +54,8 @@ async function startServer() {
     doctorModel,
     appointmentModel,
     sessionModel,
-    authHelpers
+    authHelpers,
+    bookingCache
   });
 
   const app = express();

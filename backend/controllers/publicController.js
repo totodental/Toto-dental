@@ -1,8 +1,13 @@
 const crypto = require("node:crypto");
 const { createError, normalizeDate, normalizeTime } = require("../utils/http");
 
-function createPublicController({ doctorModel, appointmentModel }) {
+function createPublicController({ doctorModel, appointmentModel, bookingCache }) {
   async function buildDoctorsResponse() {
+    const cached = bookingCache?.get?.();
+    if (cached) {
+      return cached;
+    }
+
     const doctors = await doctorModel.getAll();
     const slotRows = await doctorModel.getAllSlots();
     const bookedRows = await appointmentModel.getBookedSlots();
@@ -11,7 +16,7 @@ function createPublicController({ doctorModel, appointmentModel }) {
       bookedRows.map((row) => `${row.doctor_id}|${row.appointment_date}|${row.appointment_time}`)
     );
 
-    return doctors.map((doctor) => {
+    const response = doctors.map((doctor) => {
       const doctorSlots = slotRows.filter((slot) => slot.doctor_id === doctor.id);
       const grouped = new Map();
 
@@ -41,6 +46,9 @@ function createPublicController({ doctorModel, appointmentModel }) {
             : Array.from(grouped.values()).filter((slot) => slot.times.length > 0)
       };
     });
+
+    bookingCache?.set?.(response);
+    return response;
   }
 
   async function buildAppointmentPayload(input) {
@@ -94,6 +102,7 @@ function createPublicController({ doctorModel, appointmentModel }) {
         const id = crypto.randomUUID();
 
         await appointmentModel.create(id, payload, now);
+        bookingCache?.invalidate?.();
         res.status(201).json({ ok: true, appointment: await appointmentModel.getById(id) });
       } catch (error) {
         next(error);

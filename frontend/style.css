@@ -13,7 +13,7 @@
   --radius-md: 22px;
   --font-body: "Segoe UI", "Arial", "Helvetica Neue", sans-serif;
   --font-display: "Segoe UI Semibold", "Segoe UI", "Arial", sans-serif;
-  --anchor-offset: 118px;
+  --anchor-offset: 92px;
 }
 
 * {
@@ -327,13 +327,19 @@ a {
 }
 
 .section {
-  padding-top: 90px;
+  padding-top: 72px;
   padding-bottom: 20px;
 }
 
 .section-heading {
   max-width: 720px;
   margin-bottom: 28px;
+  padding: 24px 28px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.64);
+  border: 1px solid rgba(15, 61, 92, 0.08);
+  box-shadow: 0 20px 42px rgba(17, 74, 120, 0.08);
+  backdrop-filter: blur(10px);
 }
 
 .section-heading h2,
@@ -1294,7 +1300,7 @@ a {
 
 @media (max-width: 720px) {
   :root {
-    --anchor-offset: 156px;
+    --anchor-offset: 132px;
   }
 
   .topbar {
@@ -1358,6 +1364,10 @@ a {
   .service-card,
   .contact-card {
     padding: 24px;
+  }
+
+  .section-heading {
+    padding: 20px 18px;
   }
 
   .footer {

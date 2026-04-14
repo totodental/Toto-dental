@@ -130,6 +130,7 @@ async function initBooking() {
   const patientForm = document.querySelector("#patient-form");
   const formResponse = document.querySelector("#form-response");
   const submitButton = patientForm?.querySelector('button[type="submit"]');
+  const timeDisplay = document.querySelector("#time-display");
   const bookingPanel = document.querySelector(".booking-panel");
   const successModal = document.querySelector("#success-modal");
   const successModalClose = document.querySelector("#success-modal-close");
@@ -142,7 +143,8 @@ async function initBooking() {
     !selectedDoctor ||
     !slotCalendar ||
     !patientForm ||
-    !formResponse
+    !formResponse ||
+    !timeDisplay
   ) {
     return;
   }
@@ -163,6 +165,7 @@ async function initBooking() {
   const clearSelectedTime = () => {
     patientForm.querySelector('input[name="date"]').value = "";
     patientForm.querySelector('input[name="time"]').value = "";
+    timeDisplay.value = "";
     selectedSlotKey = "";
   };
 
@@ -199,6 +202,7 @@ async function initBooking() {
 
     dateInput.disabled = isBusy;
     timeInput.disabled = isBusy;
+    timeDisplay.disabled = isBusy;
     if (submitButton) {
       submitButton.disabled = isBusy;
     }
@@ -427,6 +431,7 @@ async function initBooking() {
     doctorPicker.value = activeDoctorId;
     patientForm.querySelector('input[name="date"]').value = target.dataset.date || "";
     patientForm.querySelector('input[name="time"]').value = target.dataset.time || "";
+    timeDisplay.value = target.dataset.time || "";
     selectedSlotKey = getSelectedSlotKey(target.dataset.date || "", target.dataset.time || "");
     renderDoctors();
     renderScheduler();

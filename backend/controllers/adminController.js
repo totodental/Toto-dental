@@ -6,7 +6,8 @@ function createAdminController({
   doctorModel,
   appointmentModel,
   sessionModel,
-  authHelpers
+  authHelpers,
+  bookingCache
 }) {
   async function archiveAppointment(id, notFoundMessage) {
     const result = await appointmentModel.archiveById(id, new Date().toISOString());
@@ -149,6 +150,7 @@ function createAdminController({
         const now = new Date().toISOString();
         const id = crypto.randomUUID();
         await appointmentModel.create(id, payload, now);
+        bookingCache?.invalidate?.();
         res.status(201).json({ ok: true, appointment: await appointmentModel.getById(id) });
       } catch (error) {
         next(error);
@@ -164,6 +166,7 @@ function createAdminController({
         const payload = await buildAppointmentPayload(req.body || {}, existing);
         await ensureNoConfirmedConflict(payload, existing.id);
         await appointmentModel.update(existing.id, payload, new Date().toISOString());
+        bookingCache?.invalidate?.();
         res.json({ ok: true, appointment: await appointmentModel.getById(existing.id) });
       } catch (error) {
         next(error);
@@ -174,6 +177,7 @@ function createAdminController({
       res.setHeader("Cache-Control", "no-store");
       try {
         await archiveAppointment(req.params.id, "Захиалга олдсонгүй.");
+        bookingCache?.invalidate?.();
         res.status(204).end();
       } catch (error) {
         next(error);
@@ -184,6 +188,7 @@ function createAdminController({
       res.setHeader("Cache-Control", "no-store");
       try {
         await archiveAppointment(req.params.id, "Хүсэлт олдсонгүй.");
+        bookingCache?.invalidate?.();
         res.status(204).end();
       } catch (error) {
         next(error);
@@ -194,6 +199,7 @@ function createAdminController({
       try {
         res.setHeader("Cache-Control", "no-store");
         await appointmentModel.archiveAll(new Date().toISOString());
+        bookingCache?.invalidate?.();
         res.status(204).end();
       } catch (error) {
         next(error);
@@ -210,6 +216,7 @@ function createAdminController({
 
         const result = await doctorModel.updateAvailability(req.params.id, availability);
         if (!result.changes) throw createError(404, "Эмч олдсонгүй.");
+        bookingCache?.invalidate?.();
         res.json({ ok: true });
       } catch (error) {
         next(error);
