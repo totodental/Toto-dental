@@ -34,6 +34,12 @@ FRONTEND_ORIGINS=https://toto-dental.vercel.app,https://toto-dental-hjbv.vercel.
 RAILWAY_VOLUME_MOUNT_PATH=/data
 ```
 
+Production note:
+
+- Set `FRONTEND_ORIGINS` to the exact frontend URLs you control. Wildcard Vercel preview origins are no longer trusted.
+- In production, the API now refuses to start unless `SESSION_SECRET`, `ADMIN_ROUTE_ID`, `ADMIN_USERNAME`, and either `ADMIN_PASSWORD` or `ADMIN_PASSWORD_HASH` are set to non-default secure values.
+- If you prefer not to store a plain admin password in hosting settings, set `ADMIN_PASSWORD_HASH` instead.
+
 To keep appointments and reception calendar data after redeploy/restart, attach a Railway volume. The backend will automatically store SQLite under:
 
 ```bash
@@ -50,6 +56,12 @@ or
 
 ```bash
 DATA_DIR=/absolute/path/to/storage
+```
+
+If you deploy with Render, set:
+
+```bash
+DATA_DIR=/var/data/toto-dental-data
 ```
 
 ## Frontend deployment on Vercel
@@ -82,3 +94,10 @@ SUPABASE_DB_URL=
 - `render.yaml` legacy Render blueprint
 - `frontend/vercel.json` Vercel frontend routing and headers
 - `frontend/package.json` frontend build step
+
+## Client handoff checklist
+
+- Backend deploy has persistent volume attached and `RAILWAY_VOLUME_MOUNT_PATH` configured.
+- Production secrets are set with non-default values.
+- `FRONTEND_ORIGINS` contains only the final Vercel production domain and any intentionally approved preview domains.
+- Frontend is rebuilt so `frontend/dist/` matches the latest source before final deployment.

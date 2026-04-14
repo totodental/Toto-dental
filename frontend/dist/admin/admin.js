@@ -1,5 +1,12 @@
 const API_BASE = (window.__APP_CONFIG__?.API_BASE || "/api").replace(/\/+$/, "");
 
+function formatLocalDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 const availabilityLabels = {
   available: "Завтай",
   limited: "Цөөн сул цагтай",
@@ -87,6 +94,7 @@ async function initAdmin() {
     if (status === "confirmed") return "Баталгаажсан";
     if (status === "cancelled") return "Цуцалсан";
     if (status === "completed") return "Дууссан";
+    if (status === "archived") return "Түүхэнд хадгалсан";
     return "Хүлээгдэж буй";
   };
 
@@ -247,7 +255,7 @@ async function initAdmin() {
                   <button class="ghost-btn" type="button" data-action="confirm" data-id="${request.id}">Батлах</button>
                   <button class="ghost-btn" type="button" data-action="edit" data-id="${request.id}">Өөрчлөх</button>
                   <button class="ghost-btn" type="button" data-action="reject" data-id="${request.id}">Цуцлах</button>
-                  <button class="ghost-btn" type="button" data-action="delete" data-id="${request.id}">Устгах</button>
+                  <button class="ghost-btn" type="button" data-action="delete" data-id="${request.id}">Түүхлэх</button>
                 </div>
               </article>
             `;
@@ -298,7 +306,7 @@ async function initAdmin() {
 
     calendarGrid.innerHTML = cells
       .map(({ date, isOtherMonth }) => {
-        const iso = date.toISOString().slice(0, 10);
+        const iso = formatLocalDate(date);
         const dayRequests = requests
           .filter((request) => request.date === iso)
           .sort((a, b) => a.time.localeCompare(b.time));
@@ -469,7 +477,7 @@ async function initAdmin() {
 
   editorDelete.addEventListener("click", async () => {
     if (!selectedAppointmentId) {
-      editorFeedback.textContent = "Устгах захиалга сонгогдоогүй байна.";
+      editorFeedback.textContent = "Түүхлэх захиалга сонгогдоогүй байна.";
       return;
     }
 
@@ -477,7 +485,7 @@ async function initAdmin() {
       await requestJson(`/admin/appointments/${selectedAppointmentId}`, { method: "DELETE" });
       await loadDashboard();
       resetEditor(editorDate.value);
-      editorFeedback.textContent = "Захиалга устгагдлаа.";
+      editorFeedback.textContent = "Захиалга түүхэнд хадгалагдлаа.";
     } catch (error) {
       editorFeedback.textContent = error.message;
     }
@@ -540,20 +548,21 @@ async function initAdmin() {
   });
 
   clearRequests.addEventListener("click", async () => {
-    const confirmed = window.confirm("Та итгэлтэй байна уу? Бүх хүсэлтүүд бүрэн цэвэрлэгдэнэ.");
+    const confirmed = window.confirm("Та итгэлтэй байна уу? Бүх хүсэлтүүд түүхэнд хадгалагдаж, идэвхтэй жагсаалтаас гарна.");
     if (!confirmed) return;
 
     try {
       await requestJson("/admin/requests", { method: "DELETE" });
       await loadDashboard();
       resetEditor(editorDate.value);
+      editorFeedback.textContent = "Хүсэлтүүд түүхэнд хадгалагдлаа.";
     } catch (error) {
       editorFeedback.textContent = error.message;
     }
   });
 
   createAppointmentBtn.addEventListener("click", () => {
-    resetEditor(new Date().toISOString().slice(0, 10));
+    resetEditor(formatLocalDate(new Date()));
   });
 
   calendarGrid.addEventListener("click", (event) => {

@@ -32,7 +32,10 @@ function createPublicController({ doctorModel, appointmentModel }) {
 
       return {
         ...doctor,
-        slots: Array.from(grouped.values()).filter((slot) => slot.times.length > 0)
+        slots:
+          doctor.availability === "busy"
+            ? []
+            : Array.from(grouped.values()).filter((slot) => slot.times.length > 0)
       };
     });
   }
@@ -45,14 +48,17 @@ function createPublicController({ doctorModel, appointmentModel }) {
     const date = normalizeDate(input.date || "");
     const time = normalizeTime(input.time || "");
 
-    if (!patientName) throw createError(400, "Өвчтөний нэр шаардлагатай.");
-    if (!phone) throw createError(400, "Утасны дугаар шаардлагатай.");
-    if (patientName.length > 80) throw createError(400, "Өвчтөний нэр хэт урт байна.");
-    if (phone.length > 32) throw createError(400, "Утасны дугаар хэт урт байна.");
-    if (notes.length > 1000) throw createError(400, "Тайлбар хэт урт байна.");
+    if (!patientName) throw createError(400, "Ó¨Ð²Ñ‡Ñ‚Ó©Ð½Ð¸Ð¹ Ð½ÑÑ€ ÑˆÐ°Ð°Ñ€Ð´Ð»Ð°Ð³Ð°Ñ‚Ð°Ð¹.");
+    if (!phone) throw createError(400, "Ð£Ñ‚Ð°ÑÐ½Ñ‹ Ð´ÑƒÐ³Ð°Ð°Ñ€ ÑˆÐ°Ð°Ñ€Ð´Ð»Ð°Ð³Ð°Ñ‚Ð°Ð¹.");
+    if (patientName.length > 80) throw createError(400, "Ó¨Ð²Ñ‡Ñ‚Ó©Ð½Ð¸Ð¹ Ð½ÑÑ€ Ñ…ÑÑ‚ ÑƒÑ€Ñ‚ Ð±Ð°Ð¹Ð½Ð°.");
+    if (phone.length > 32) throw createError(400, "Ð£Ñ‚Ð°ÑÐ½Ñ‹ Ð´ÑƒÐ³Ð°Ð°Ñ€ Ñ…ÑÑ‚ ÑƒÑ€Ñ‚ Ð±Ð°Ð¹Ð½Ð°.");
+    if (notes.length > 1000) throw createError(400, "Ð¢Ð°Ð¹Ð»Ð±Ð°Ñ€ Ñ…ÑÑ‚ ÑƒÑ€Ñ‚ Ð±Ð°Ð¹Ð½Ð°.");
 
     const doctor = doctorModel.getById(doctorId);
-    if (!doctor) throw createError(400, "Эмч олдсонгүй.");
+    if (!doctor) throw createError(400, "Ð­Ð¼Ñ‡ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹.");
+    if (doctor.availability === "busy") {
+      throw createError(409, "Ð¡Ð¾Ð½Ð³Ð¾ÑÐ¾Ð½ ÑÐ¼Ñ‡ Ó©Ð½Ó©Ó©Ð´Ó©Ñ€ Ð·Ð°Ð²Ð³Ò¯Ð¹ Ð±Ð°Ð¹Ð½Ð°. Ó¨Ó©Ñ€ Ñ†Ð°Ð³ ÑÑÐ²ÑÐ» Ó©Ó©Ñ€ ÑÐ¼Ñ‡ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ.");
+    }
 
     return {
       patientName,

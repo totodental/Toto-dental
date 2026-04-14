@@ -1,5 +1,12 @@
 const API_BASE = (window.__APP_CONFIG__?.API_BASE || "/api").replace(/\/+$/, "");
 
+function formatLocalDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 const availabilityLabels = {
   available: "Завтай",
   limited: "Цөөн сул цагтай",
@@ -299,7 +306,7 @@ async function initAdmin() {
 
     calendarGrid.innerHTML = cells
       .map(({ date, isOtherMonth }) => {
-        const iso = date.toISOString().slice(0, 10);
+        const iso = formatLocalDate(date);
         const dayRequests = requests
           .filter((request) => request.date === iso)
           .sort((a, b) => a.time.localeCompare(b.time));
@@ -555,7 +562,7 @@ async function initAdmin() {
   });
 
   createAppointmentBtn.addEventListener("click", () => {
-    resetEditor(new Date().toISOString().slice(0, 10));
+    resetEditor(formatLocalDate(new Date()));
   });
 
   calendarGrid.addEventListener("click", (event) => {

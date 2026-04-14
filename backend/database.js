@@ -12,11 +12,14 @@ const DATA_DIR = SQLITE_DB_PATH
     ? path.resolve(process.env.DATA_DIR)
     : process.env.RAILWAY_VOLUME_MOUNT_PATH
       ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "toto-dental-data")
+      : process.env.RENDER_DISK_PATH
+        ? path.join(process.env.RENDER_DISK_PATH, "toto-dental-data")
       : process.env.VOLUME_MOUNT_PATH
         ? path.join(process.env.VOLUME_MOUNT_PATH, "toto-dental-data")
         : path.join(__dirname, "data");
 
 const DB_PATH = SQLITE_DB_PATH || path.join(DATA_DIR, "app.db");
+const SLOT_SEED_VERSION = "2";
 
 const seedDoctors = [
   {
@@ -54,6 +57,13 @@ const legacyDoctorMap = {
   nomin: "mandakhnaran"
 };
 
+function formatLocalDate(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function generateSlots(days = 3, startHour = 8, endHour = 18) {
   const slots = [];
 
@@ -62,7 +72,7 @@ function generateSlots(days = 3, startHour = 8, endHour = 18) {
     date.setDate(date.getDate() + dayOffset);
 
     const label = date.toLocaleDateString("mn-MN", { weekday: "long" });
-    const dateStr = date.toISOString().split("T")[0];
+    const dateStr = formatLocalDate(date);
 
     for (let hour = startHour; hour < endHour; hour += 1) {
       const time = `${String(hour).padStart(2, "0")}:00`;
@@ -112,6 +122,9 @@ function initDatabase() {
       slot_time TEXT NOT NULL
     );
 
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_doctor_slots_unique
+    ON doctor_slots (doctor_id, slot_date, slot_time);
+
     CREATE TABLE IF NOT EXISTS appointments (
       id TEXT PRIMARY KEY,
       patient_name TEXT NOT NULL,
@@ -135,6 +148,11 @@ function initDatabase() {
       signature TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS app_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
   `);
 
   const upsertDoctor = db.prepare(`
@@ -154,6 +172,12 @@ function initDatabase() {
     INSERT INTO doctor_slots (doctor_id, label, slot_date, slot_time)
     VALUES (@doctor_id, @label, @slot_date, @slot_time)
   `);
+  const getMeta = db.prepare("SELECT value FROM app_meta WHERE key = ?");
+  const setMeta = db.prepare(`
+    INSERT INTO app_meta (key, value)
+    VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `);
 
   const migrateLegacyAppointments = db.prepare(`
     UPDATE appointments
@@ -164,6 +188,9 @@ function initDatabase() {
   const deleteDoctor = db.prepare("DELETE FROM doctors WHERE id = ?");
 
   const syncSeedData = db.transaction(() => {
+    const slotSeedVersion = getMeta.get("slot_seed_version")?.value || "";
+    const shouldRefreshSeedSlots = slotSeedVersion !== SLOT_SEED_VERSION;
+
     seedDoctors.forEach((doctor) => {
       upsertDoctor.run(doctor);
     });
@@ -175,6 +202,8 @@ function initDatabase() {
     });
 
     seedDoctors.forEach((doctor) => {
+      if (!shouldRefreshSeedSlots) return;
+
       deleteDoctorSlots.run(doctor.id);
 
       getSeedSlots(doctor.id).forEach((slot) => {
@@ -186,6 +215,8 @@ function initDatabase() {
         });
       });
     });
+
+    setMeta.run("slot_seed_version", SLOT_SEED_VERSION);
   });
 
   syncSeedData();

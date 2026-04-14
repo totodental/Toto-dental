@@ -8,13 +8,37 @@ function normalizeOrigin(value) {
 function isAllowedOrigin(origin, allowedOrigins) {
   const normalizedOrigin = normalizeOrigin(origin);
   if (!normalizedOrigin) return false;
-  if (allowedOrigins.has(normalizedOrigin)) return true;
+  return allowedOrigins.has(normalizedOrigin);
+}
 
-  try {
-    const parsed = new URL(normalizedOrigin);
-    return parsed.hostname.endsWith(".vercel.app");
-  } catch {
-    return false;
+function ensureProductionReady(config) {
+  if (process.env.NODE_ENV !== "production") return;
+
+  const missing = [];
+
+  if (!process.env.SESSION_SECRET || config.sessionSecret === "change-this-secret") {
+    missing.push("SESSION_SECRET");
+  }
+
+  if (!process.env.ADMIN_ROUTE_ID || config.adminRouteId === "ashdgfaskfashjfgyuyfgywegiwgu") {
+    missing.push("ADMIN_ROUTE_ID");
+  }
+
+  if (!process.env.ADMIN_USERNAME || config.adminUsername === "admin") {
+    missing.push("ADMIN_USERNAME");
+  }
+
+  const hasPasswordHash = Boolean(process.env.ADMIN_PASSWORD_HASH);
+  const hasStrongPassword = Boolean(process.env.ADMIN_PASSWORD) && config.adminPassword !== "admin123";
+
+  if (!hasPasswordHash && !hasStrongPassword) {
+    missing.push("ADMIN_PASSWORD or ADMIN_PASSWORD_HASH");
+  }
+
+  if (missing.length) {
+    throw new Error(
+      `Production configuration is incomplete. Set secure values for: ${missing.join(", ")}`
+    );
   }
 }
 
@@ -70,7 +94,7 @@ function getConfig() {
       .filter(Boolean)
   );
 
-  return {
+  const config = {
     port: Number(process.env.PORT || 3000),
     sessionSecret: process.env.SESSION_SECRET || "change-this-secret",
     sessionCookie: "toto_admin_session",
@@ -85,6 +109,10 @@ function getConfig() {
     allowedOrigins,
     isAllowedOrigin: (origin) => isAllowedOrigin(origin, allowedOrigins)
   };
+
+  ensureProductionReady(config);
+
+  return config;
 }
 
 module.exports = {

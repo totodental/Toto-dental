@@ -163,6 +163,7 @@ async function initBooking() {
 
   const renderDoctors = () => {
     if (!doctorGrid) return;
+
     doctorGrid.innerHTML = getFilteredDoctors()
       .map(
         (doctor) => `
@@ -186,7 +187,11 @@ async function initBooking() {
   const renderScheduler = () => {
     const filteredDoctors = getFilteredDoctors();
     const doctor = filteredDoctors.find((item) => item.id === activeDoctorId) || filteredDoctors[0];
-    if (!doctor) return;
+    if (!doctor) {
+      selectedDoctor.innerHTML = "";
+      slotCalendar.innerHTML = "";
+      return;
+    }
 
     selectedDoctor.innerHTML = `
       <article class="selected-card selected-${doctor.availability}">
@@ -202,6 +207,23 @@ async function initBooking() {
         </div>
       </article>
     `;
+
+    if (doctor.availability === "busy") {
+      patientForm.querySelector('input[name="date"]').value = "";
+      patientForm.querySelector('input[name="time"]').value = "";
+      slotCalendar.innerHTML = `
+        <article class="slot-day">
+          <div class="slot-head">
+            <strong>${doctor.name}</strong>
+            <span>${availabilityLabels[doctor.availability]}</span>
+          </div>
+          <div class="slot-times">
+            <span class="slot-empty">Ð­Ð½Ñ ÑÐ¼Ñ‡Ð¸Ð¹Ð³ reception Ó©Ð½Ó©Ó©Ð´Ó©Ñ€ Ð·Ð°Ð²Ð³Ò¯Ð¹ Ð³ÑÐ¶ Ñ‚ÑÐ¼Ð´ÑÐ³Ð»ÑÑÑÐ½ Ñ‚ÑƒÐ» Ñ†Ð°Ð³ ÑÐ¾Ð½Ð³Ð¾Ñ…Ð³Ò¯Ð¹.</span>
+          </div>
+        </article>
+      `;
+      return;
+    }
 
     slotCalendar.innerHTML = doctor.slots
       .map(
@@ -291,8 +313,13 @@ async function initBooking() {
   patientForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const formData = new FormData(patientForm);
+    const selectedDoctorData = doctors.find((doctor) => doctor.id === formData.get("doctorId"));
 
     try {
+      if (selectedDoctorData?.availability === "busy") {
+        throw new Error("Ð¡Ð¾Ð½Ð³Ð¾ÑÐ¾Ð½ ÑÐ¼Ñ‡ Ó©Ð½Ó©Ó©Ð´Ó©Ñ€ Ð·Ð°Ð²Ð³Ò¯Ð¹ Ð±Ð°Ð¹Ð½Ð°. Ó¨Ó©Ñ€ ÑÐ¼Ñ‡ ÑÑÐ²ÑÐ» Ó©Ó©Ñ€ Ó©Ð´Ó©Ñ€ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ.");
+      }
+
       await requestJson("/public/requests", {
         method: "POST",
         body: JSON.stringify({
