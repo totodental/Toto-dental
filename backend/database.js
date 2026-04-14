@@ -125,9 +125,57 @@ function getSeedSlots(doctorId) {
   return generateSlots(3, 10, 18);
 }
 
-function initDatabase() {
+async function runSupabaseQuery(queryPromise) {
+  const { data, error } = await queryPromise;
+  if (error) throw error;
+  return data;
+}
+
+async function syncSupabaseSeedData(supabase) {
+  await runSupabaseQuery(
+    supabase.from("doctors").upsert(
+      seedDoctors.map((doctor) => ({
+        id: doctor.id,
+        name: doctor.name,
+        role: doctor.role,
+        branch: doctor.branch,
+        hours: doctor.hours,
+        availability: doctor.availability,
+        note: doctor.note
+      })),
+      { onConflict: "id" }
+    )
+  );
+
+  for (const doctor of seedDoctors) {
+    const existingSlots = await runSupabaseQuery(
+      supabase.from("doctor_slots")
+        .select("id", { count: "exact" })
+        .eq("doctor_id", doctor.id)
+        .limit(1)
+    );
+
+    if (existingSlots.length > 0) {
+      continue;
+    }
+
+    await runSupabaseQuery(
+      supabase.from("doctor_slots").insert(
+        getSeedSlots(doctor.id).map((slot) => ({
+          doctor_id: doctor.id,
+          label: slot.label,
+          slot_date: slot.date,
+          slot_time: slot.time
+        }))
+      )
+    );
+  }
+}
+
+async function initDatabase() {
   const supabase = createSupabaseClient();
   if (supabase) {
+    await syncSupabaseSeedData(supabase);
     return {
       type: "supabase",
       client: supabase,
