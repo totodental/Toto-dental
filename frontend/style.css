@@ -892,6 +892,12 @@ a {
   width: fit-content;
 }
 
+.submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: saturate(0.7);
+}
+
 .form-response,
 .admin-feedback,
 .empty-box {

@@ -14,7 +14,116 @@ function mapAppointment(row) {
   };
 }
 
-function createAppointmentModel(db) {
+async function runSupabaseQuery(queryPromise) {
+  const { data, error } = await queryPromise;
+  if (error) throw error;
+  return data;
+}
+
+function toAppointmentRow(id, payload, now) {
+  return {
+    id,
+    patient_name: payload.patientName,
+    phone: payload.phone,
+    doctor_id: payload.doctorId,
+    branch: payload.branch,
+    appointment_date: payload.date,
+    appointment_time: payload.time,
+    notes: payload.notes,
+    status: payload.status,
+    created_at: now,
+    updated_at: now
+  };
+}
+
+function toAppointmentUpdate(payload, now) {
+  return {
+    patient_name: payload.patientName,
+    phone: payload.phone,
+    doctor_id: payload.doctorId,
+    branch: payload.branch,
+    appointment_date: payload.date,
+    appointment_time: payload.time,
+    notes: payload.notes,
+    status: payload.status,
+    updated_at: now
+  };
+}
+
+function createAppointmentModel(database) {
+  const db = database.client;
+
+  if (database.type === "supabase") {
+    return {
+      async listAll() {
+        const rows = await runSupabaseQuery(
+          db.from("appointments")
+            .select("id, patient_name, phone, doctor_id, branch, appointment_date, appointment_time, notes, status, created_at, updated_at")
+            .order("created_at", { ascending: false })
+            .order("id", { ascending: false })
+        );
+        return rows.map(mapAppointment);
+      },
+      async getById(id) {
+        const rows = await runSupabaseQuery(
+          db.from("appointments")
+            .select("id, patient_name, phone, doctor_id, branch, appointment_date, appointment_time, notes, status, created_at, updated_at")
+            .eq("id", id)
+            .limit(1)
+        );
+        return rows[0] ? mapAppointment(rows[0]) : null;
+      },
+      async create(id, payload, now) {
+        await runSupabaseQuery(db.from("appointments").insert(toAppointmentRow(id, payload, now)));
+      },
+      async update(id, payload, now) {
+        await runSupabaseQuery(
+          db.from("appointments")
+            .update(toAppointmentUpdate(payload, now))
+            .eq("id", id)
+        );
+      },
+      async archiveById(id, now) {
+        const rows = await runSupabaseQuery(
+          db.from("appointments")
+            .update({ status: "archived", updated_at: now })
+            .eq("id", id)
+            .select("id")
+        );
+        return { changes: rows.length };
+      },
+      async archiveAll(now) {
+        const rows = await runSupabaseQuery(
+          db.from("appointments")
+            .update({ status: "archived", updated_at: now })
+            .neq("status", "archived")
+            .select("id")
+        );
+        return { changes: rows.length };
+      },
+      async getConfirmedConflict(doctorId, date, time, ignoreId = "") {
+        const rows = await runSupabaseQuery(
+          db.from("appointments")
+            .select("id")
+            .eq("doctor_id", doctorId)
+            .eq("appointment_date", date)
+            .eq("appointment_time", time)
+            .in("status", ["confirmed", "completed"])
+            .neq("id", ignoreId || "")
+            .limit(1)
+        );
+        return rows[0] || null;
+      },
+      async getBookedSlots() {
+        return runSupabaseQuery(
+          db.from("appointments")
+            .select("doctor_id, appointment_date, appointment_time")
+            .in("status", ["confirmed", "completed"])
+        );
+      }
+    };
+  }
+
   const selectBase = `
     SELECT id, patient_name, phone, doctor_id, branch, appointment_date, appointment_time, notes, status, created_at, updated_at
     FROM appointments
@@ -58,14 +167,14 @@ function createAppointmentModel(db) {
     WHERE status IN ('confirmed', 'completed')
   `);
   return {
-    listAll() {
+    async listAll() {
       return listStmt.all().map(mapAppointment);
     },
-    getById(id) {
+    async getById(id) {
       const row = getByIdStmt.get(id);
       return row ? mapAppointment(row) : null;
     },
-    create(id, payload, now) {
+    async create(id, payload, now) {
       createStmt.run(
         id,
         payload.patientName,
@@ -80,7 +189,7 @@ function createAppointmentModel(db) {
         now
       );
     },
-    update(id, payload, now) {
+    async update(id, payload, now) {
       updateStmt.run(
         payload.patientName,
         payload.phone,
@@ -94,16 +203,16 @@ function createAppointmentModel(db) {
         id
       );
     },
-    archiveById(id, now) {
+    async archiveById(id, now) {
       return archiveByIdStmt.run(now, id);
     },
-    archiveAll(now) {
+    async archiveAll(now) {
       return archiveAllStmt.run(now);
     },
-    getConfirmedConflict(doctorId, date, time, ignoreId = "") {
+    async getConfirmedConflict(doctorId, date, time, ignoreId = "") {
       return confirmedConflictStmt.get(doctorId, date, time, ignoreId || "");
     },
-    getBookedSlots() {
+    async getBookedSlots() {
       return bookedSlotsStmt.all();
     }
   };

@@ -2,10 +2,10 @@ const crypto = require("node:crypto");
 const { createError, normalizeDate, normalizeTime } = require("../utils/http");
 
 function createPublicController({ doctorModel, appointmentModel }) {
-  function buildDoctorsResponse() {
-    const doctors = doctorModel.getAll();
-    const slotRows = doctorModel.getAllSlots();
-    const bookedRows = appointmentModel.getBookedSlots();
+  async function buildDoctorsResponse() {
+    const doctors = await doctorModel.getAll();
+    const slotRows = await doctorModel.getAllSlots();
+    const bookedRows = await appointmentModel.getBookedSlots();
 
     const bookedSet = new Set(
       bookedRows.map((row) => `${row.doctor_id}|${row.appointment_date}|${row.appointment_time}`)
@@ -40,7 +40,7 @@ function createPublicController({ doctorModel, appointmentModel }) {
     });
   }
 
-  function buildAppointmentPayload(input) {
+  async function buildAppointmentPayload(input) {
     const patientName = (input.patientName || "").trim();
     const phone = (input.phone || "").trim();
     const doctorId = input.doctorId || "";
@@ -48,16 +48,16 @@ function createPublicController({ doctorModel, appointmentModel }) {
     const date = normalizeDate(input.date || "");
     const time = normalizeTime(input.time || "");
 
-    if (!patientName) throw createError(400, "Ó¨Ð²Ñ‡Ñ‚Ó©Ð½Ð¸Ð¹ Ð½ÑÑ€ ÑˆÐ°Ð°Ñ€Ð´Ð»Ð°Ð³Ð°Ñ‚Ð°Ð¹.");
-    if (!phone) throw createError(400, "Ð£Ñ‚Ð°ÑÐ½Ñ‹ Ð´ÑƒÐ³Ð°Ð°Ñ€ ÑˆÐ°Ð°Ñ€Ð´Ð»Ð°Ð³Ð°Ñ‚Ð°Ð¹.");
-    if (patientName.length > 80) throw createError(400, "Ó¨Ð²Ñ‡Ñ‚Ó©Ð½Ð¸Ð¹ Ð½ÑÑ€ Ñ…ÑÑ‚ ÑƒÑ€Ñ‚ Ð±Ð°Ð¹Ð½Ð°.");
-    if (phone.length > 32) throw createError(400, "Ð£Ñ‚Ð°ÑÐ½Ñ‹ Ð´ÑƒÐ³Ð°Ð°Ñ€ Ñ…ÑÑ‚ ÑƒÑ€Ñ‚ Ð±Ð°Ð¹Ð½Ð°.");
-    if (notes.length > 1000) throw createError(400, "Ð¢Ð°Ð¹Ð»Ð±Ð°Ñ€ Ñ…ÑÑ‚ ÑƒÑ€Ñ‚ Ð±Ð°Ð¹Ð½Ð°.");
+    if (!patientName) throw createError(400, "Өвчтөний нэр шаардлагатай.");
+    if (!phone) throw createError(400, "Утасны дугаар шаардлагатай.");
+    if (patientName.length > 80) throw createError(400, "Өвчтөний нэр хэт урт байна.");
+    if (phone.length > 32) throw createError(400, "Утасны дугаар хэт урт байна.");
+    if (notes.length > 1000) throw createError(400, "Тайлбар хэт урт байна.");
 
-    const doctor = doctorModel.getById(doctorId);
-    if (!doctor) throw createError(400, "Ð­Ð¼Ñ‡ Ð¾Ð»Ð´ÑÐ¾Ð½Ð³Ò¯Ð¹.");
+    const doctor = await doctorModel.getById(doctorId);
+    if (!doctor) throw createError(400, "Эмч олдсонгүй.");
     if (doctor.availability === "busy") {
-      throw createError(409, "Ð¡Ð¾Ð½Ð³Ð¾ÑÐ¾Ð½ ÑÐ¼Ñ‡ Ó©Ð½Ó©Ó©Ð´Ó©Ñ€ Ð·Ð°Ð²Ð³Ò¯Ð¹ Ð±Ð°Ð¹Ð½Ð°. Ó¨Ó©Ñ€ Ñ†Ð°Ð³ ÑÑÐ²ÑÐ» Ó©Ó©Ñ€ ÑÐ¼Ñ‡ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ.");
+      throw createError(409, "Сонгосон эмч өнөөдөр завгүй байна. Өөр цаг эсвэл өөр эмч сонгоно уу.");
     }
 
     return {
@@ -76,18 +76,22 @@ function createPublicController({ doctorModel, appointmentModel }) {
     getHealth(req, res) {
       res.json({ ok: true });
     },
-    getBooking(req, res) {
-      res.setHeader("Cache-Control", "no-store");
-      res.json({ doctors: buildDoctorsResponse() });
-    },
-    createRequest(req, res, next) {
+    async getBooking(req, res, next) {
       try {
-        const payload = buildAppointmentPayload(req.body || {});
+        res.setHeader("Cache-Control", "no-store");
+        res.json({ doctors: await buildDoctorsResponse() });
+      } catch (error) {
+        next(error);
+      }
+    },
+    async createRequest(req, res, next) {
+      try {
+        const payload = await buildAppointmentPayload(req.body || {});
         const now = new Date().toISOString();
         const id = crypto.randomUUID();
 
-        appointmentModel.create(id, payload, now);
-        res.status(201).json({ ok: true, appointment: appointmentModel.getById(id) });
+        await appointmentModel.create(id, payload, now);
+        res.status(201).json({ ok: true, appointment: await appointmentModel.getById(id) });
       } catch (error) {
         next(error);
       }

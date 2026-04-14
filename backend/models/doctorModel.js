@@ -1,4 +1,51 @@
-function createDoctorModel(db) {
+async function runSupabaseQuery(queryPromise) {
+  const { data, error } = await queryPromise;
+  if (error) throw error;
+  return data;
+}
+
+function createDoctorModel(database) {
+  const db = database.client;
+
+  if (database.type === "supabase") {
+    return {
+      async getById(id) {
+        const rows = await runSupabaseQuery(
+          db.from("doctors")
+            .select("id, name, role, branch, hours, availability, note")
+            .eq("id", id)
+            .limit(1)
+        );
+        return rows[0] || null;
+      },
+      async getAll() {
+        return runSupabaseQuery(
+          db.from("doctors")
+            .select("id, name, role, branch, hours, availability, note")
+            .order("branch")
+            .order("name")
+        );
+      },
+      async getAllSlots() {
+        return runSupabaseQuery(
+          db.from("doctor_slots")
+            .select("doctor_id, label, slot_date, slot_time")
+            .order("slot_date")
+            .order("slot_time")
+        );
+      },
+      async updateAvailability(id, availability) {
+        const rows = await runSupabaseQuery(
+          db.from("doctors")
+            .update({ availability })
+            .eq("id", id)
+            .select("id")
+        );
+        return { changes: rows.length };
+      }
+    };
+  }
+
   const getByIdStmt = db.prepare(`
     SELECT id, name, role, branch, hours, availability, note
     FROM doctors
@@ -24,16 +71,16 @@ function createDoctorModel(db) {
   `);
 
   return {
-    getById(id) {
-      return getByIdStmt.get(id);
+    async getById(id) {
+      return getByIdStmt.get(id) || null;
     },
-    getAll() {
+    async getAll() {
       return getAllStmt.all();
     },
-    getAllSlots() {
+    async getAllSlots() {
       return getSlotsStmt.all();
     },
-    updateAvailability(id, availability) {
+    async updateAvailability(id, availability) {
       return updateAvailabilityStmt.run(availability, id);
     }
   };

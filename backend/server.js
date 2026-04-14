@@ -13,11 +13,11 @@ const { createPublicRoutes } = require("./routes/publicRoutes");
 const { createAdminRoutes } = require("./routes/adminRoutes");
 
 const config = getConfig();
-const db = initDatabase();
+const database = initDatabase();
 
-const doctorModel = createDoctorModel(db);
-const appointmentModel = createAppointmentModel(db);
-const sessionModel = createSessionModel(db);
+const doctorModel = createDoctorModel(database);
+const appointmentModel = createAppointmentModel(database);
+const sessionModel = createSessionModel(database);
 const authHelpers = createAuthHelpers(config, sessionModel);
 const applyRateLimit = createRateLimiter();
 
@@ -90,4 +90,9 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || config.port || 5000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
+  if (database.type === "supabase") {
+    console.log("Database provider: Supabase");
+  } else {
+    console.log(`SQLite database path: ${database.path}`);
+  }
 });

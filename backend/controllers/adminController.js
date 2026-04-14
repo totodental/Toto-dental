@@ -8,17 +8,17 @@ function createAdminController({
   sessionModel,
   authHelpers
 }) {
-  function archiveAppointment(id, notFoundMessage) {
-    const result = appointmentModel.archiveById(id, new Date().toISOString());
+  async function archiveAppointment(id, notFoundMessage) {
+    const result = await appointmentModel.archiveById(id, new Date().toISOString());
     if (!result.changes) {
       throw createError(404, notFoundMessage);
     }
   }
 
-  function ensureNoConfirmedConflict(payload, ignoreId = "") {
+  async function ensureNoConfirmedConflict(payload, ignoreId = "") {
     if (!["confirmed", "completed"].includes(payload.status)) return;
 
-    const conflict = appointmentModel.getConfirmedConflict(
+    const conflict = await appointmentModel.getConfirmedConflict(
       payload.doctorId,
       payload.date,
       payload.time,
@@ -30,7 +30,7 @@ function createAdminController({
     }
   }
 
-  function buildAppointmentPayload(input, existing = null) {
+  async function buildAppointmentPayload(input, existing = null) {
     const patientName = (input.patientName ?? existing?.patientName ?? "").trim();
     const phone = (input.phone ?? existing?.phone ?? "").trim();
     const doctorId = input.doctorId ?? existing?.doctorId ?? "";
@@ -45,7 +45,7 @@ function createAdminController({
     if (phone.length > 32) throw createError(400, "Утасны дугаар хэт урт байна.");
     if (notes.length > 1000) throw createError(400, "Тайлбар хэт урт байна.");
 
-    const doctor = doctorModel.getById(doctorId);
+    const doctor = await doctorModel.getById(doctorId);
     if (!doctor) throw createError(400, "Эмч олдсонгүй.");
 
     if (!["pending", "confirmed", "cancelled", "completed", "archived"].includes(status)) {
@@ -65,27 +65,31 @@ function createAdminController({
   }
 
   return {
-    getSession(req, res) {
-      res.setHeader("Cache-Control", "no-store");
-      const routeValid = (req.query.id || "") === config.adminRouteId;
-      if (!routeValid) {
-        res.json({ routeValid: false, authenticated: false });
-        return;
-      }
+    async getSession(req, res, next) {
+      try {
+        res.setHeader("Cache-Control", "no-store");
+        const routeValid = (req.query.id || "") === config.adminRouteId;
+        if (!routeValid) {
+          res.json({ routeValid: false, authenticated: false });
+          return;
+        }
 
-      const cookies = authHelpers.parseCookies(req);
-      const token = cookies[config.sessionCookie];
-      if (!token) {
-        res.json({ routeValid: true, authenticated: false });
-        return;
-      }
+        const cookies = authHelpers.parseCookies(req);
+        const token = cookies[config.sessionCookie];
+        if (!token) {
+          res.json({ routeValid: true, authenticated: false });
+          return;
+        }
 
-      const signature = authHelpers.signValue(token);
-      const session = sessionModel.findValid(token, signature);
-      res.json({ routeValid: true, authenticated: Boolean(session) });
+        const signature = authHelpers.signValue(token);
+        const session = await sessionModel.findValid(token, signature);
+        res.json({ routeValid: true, authenticated: Boolean(session) });
+      } catch (error) {
+        next(error);
+      }
     },
 
-    login(req, res, next) {
+    async login(req, res, next) {
       try {
         const { routeId = "", username = "", password = "" } = req.body || {};
 
@@ -106,8 +110,8 @@ function createAdminController({
         const signature = authHelpers.signValue(token);
         const now = new Date().toISOString();
 
-        sessionModel.cleanupExpired(new Date(Date.now() - config.sessionMaxAgeMs).toISOString());
-        sessionModel.create(token, signature, now);
+        await sessionModel.cleanupExpired(new Date(Date.now() - config.sessionMaxAgeMs).toISOString());
+        await sessionModel.create(token, signature, now);
         authHelpers.setSessionCookie(res, token);
         res.json({ ok: true });
       } catch (error) {
@@ -115,76 +119,88 @@ function createAdminController({
       }
     },
 
-    logout(req, res) {
-      sessionModel.deleteByToken(req.adminSession.token);
-      authHelpers.clearSessionCookie(res);
-      res.json({ ok: true });
+    async logout(req, res, next) {
+      try {
+        await sessionModel.deleteByToken(req.adminSession.token);
+        authHelpers.clearSessionCookie(res);
+        res.json({ ok: true });
+      } catch (error) {
+        next(error);
+      }
     },
 
-    getDashboard(req, res) {
-      res.setHeader("Cache-Control", "no-store");
-      res.json({
-        doctors: doctorModel.getAll(),
-        requests: appointmentModel.listAll()
-      });
+    async getDashboard(req, res, next) {
+      try {
+        res.setHeader("Cache-Control", "no-store");
+        res.json({
+          doctors: await doctorModel.getAll(),
+          requests: await appointmentModel.listAll()
+        });
+      } catch (error) {
+        next(error);
+      }
     },
 
-    createAppointment(req, res, next) {
+    async createAppointment(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
-        const payload = buildAppointmentPayload(req.body || {});
-        ensureNoConfirmedConflict(payload);
+        const payload = await buildAppointmentPayload(req.body || {});
+        await ensureNoConfirmedConflict(payload);
         const now = new Date().toISOString();
         const id = crypto.randomUUID();
-        appointmentModel.create(id, payload, now);
-        res.status(201).json({ ok: true, appointment: appointmentModel.getById(id) });
+        await appointmentModel.create(id, payload, now);
+        res.status(201).json({ ok: true, appointment: await appointmentModel.getById(id) });
       } catch (error) {
         next(error);
       }
     },
 
-    updateAppointment(req, res, next) {
+    async updateAppointment(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
-        const existing = appointmentModel.getById(req.params.id);
+        const existing = await appointmentModel.getById(req.params.id);
         if (!existing) throw createError(404, "Захиалга олдсонгүй.");
 
-        const payload = buildAppointmentPayload(req.body || {}, existing);
-        ensureNoConfirmedConflict(payload, existing.id);
-        appointmentModel.update(existing.id, payload, new Date().toISOString());
-        res.json({ ok: true, appointment: appointmentModel.getById(existing.id) });
+        const payload = await buildAppointmentPayload(req.body || {}, existing);
+        await ensureNoConfirmedConflict(payload, existing.id);
+        await appointmentModel.update(existing.id, payload, new Date().toISOString());
+        res.json({ ok: true, appointment: await appointmentModel.getById(existing.id) });
       } catch (error) {
         next(error);
       }
     },
 
-    deleteAppointment(req, res, next) {
+    async deleteAppointment(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
-        archiveAppointment(req.params.id, "Захиалга олдсонгүй.");
+        await archiveAppointment(req.params.id, "Захиалга олдсонгүй.");
         res.status(204).end();
       } catch (error) {
         next(error);
       }
     },
 
-    deleteRequest(req, res, next) {
+    async deleteRequest(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
-        archiveAppointment(req.params.id, "Хүсэлт олдсонгүй.");
+        await archiveAppointment(req.params.id, "Хүсэлт олдсонгүй.");
         res.status(204).end();
       } catch (error) {
         next(error);
       }
     },
 
-    deleteAllRequests(req, res) {
-      res.setHeader("Cache-Control", "no-store");
-      appointmentModel.archiveAll(new Date().toISOString());
-      res.status(204).end();
+    async deleteAllRequests(req, res, next) {
+      try {
+        res.setHeader("Cache-Control", "no-store");
+        await appointmentModel.archiveAll(new Date().toISOString());
+        res.status(204).end();
+      } catch (error) {
+        next(error);
+      }
     },
 
-    updateDoctor(req, res, next) {
+    async updateDoctor(req, res, next) {
       res.setHeader("Cache-Control", "no-store");
       try {
         const availability = req.body?.availability;
@@ -192,7 +208,7 @@ function createAdminController({
           throw createError(400, "Эмчийн төлөв буруу байна.");
         }
 
-        const result = doctorModel.updateAvailability(req.params.id, availability);
+        const result = await doctorModel.updateAvailability(req.params.id, availability);
         if (!result.changes) throw createError(404, "Эмч олдсонгүй.");
         res.json({ ok: true });
       } catch (error) {

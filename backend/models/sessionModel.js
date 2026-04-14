@@ -1,4 +1,54 @@
-function createSessionModel(db) {
+async function runSupabaseQuery(queryPromise) {
+  const { data, error } = await queryPromise;
+  if (error) throw error;
+  return data;
+}
+
+function createSessionModel(database) {
+  const db = database.client;
+
+  if (database.type === "supabase") {
+    return {
+      async findValid(token, signature) {
+        const rows = await runSupabaseQuery(
+          db.from("admin_sessions")
+            .select("token, signature, created_at")
+            .eq("token", token)
+            .eq("signature", signature)
+            .limit(1)
+        );
+        return rows[0] || null;
+      },
+      async create(token, signature, createdAt) {
+        await runSupabaseQuery(
+          db.from("admin_sessions").insert({
+            token,
+            signature,
+            created_at: createdAt
+          })
+        );
+      },
+      async deleteByToken(token) {
+        const rows = await runSupabaseQuery(
+          db.from("admin_sessions")
+            .delete()
+            .eq("token", token)
+            .select("token")
+        );
+        return { changes: rows.length };
+      },
+      async cleanupExpired(cutoffIso) {
+        const rows = await runSupabaseQuery(
+          db.from("admin_sessions")
+            .delete()
+            .lt("created_at", cutoffIso)
+            .select("token")
+        );
+        return { changes: rows.length };
+      }
+    };
+  }
+
   const getValidStmt = db.prepare(`
     SELECT token, signature, created_at
     FROM admin_sessions
@@ -12,17 +62,17 @@ function createSessionModel(db) {
   const cleanupStmt = db.prepare(`DELETE FROM admin_sessions WHERE created_at < ?`);
 
   return {
-    findValid(token, signature) {
-      return getValidStmt.get(token, signature);
+    async findValid(token, signature) {
+      return getValidStmt.get(token, signature) || null;
     },
-    create(token, signature, createdAt) {
+    async create(token, signature, createdAt) {
       createStmt.run(token, signature, createdAt);
     },
-    deleteByToken(token) {
-      deleteByTokenStmt.run(token);
+    async deleteByToken(token) {
+      return deleteByTokenStmt.run(token);
     },
-    cleanupExpired(cutoffIso) {
-      cleanupStmt.run(cutoffIso);
+    async cleanupExpired(cutoffIso) {
+      return cleanupStmt.run(cutoffIso);
     }
   };
 }

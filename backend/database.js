@@ -2,21 +2,52 @@ const fs = require("node:fs");
 const path = require("node:path");
 const Database = require("better-sqlite3");
 
+function resolvePersistentDataDir() {
+  const envPath = process.env.DATA_DIR
+    || process.env.RAILWAY_VOLUME_MOUNT_PATH
+    || process.env.RENDER_DISK_PATH
+    || process.env.VOLUME_MOUNT_PATH;
+
+  if (envPath) {
+    return path.resolve(envPath, envPath.endsWith("toto-dental-data") ? "" : "toto-dental-data");
+  }
+
+  const platformCandidates = ["/data", "/var/data"];
+  for (const candidate of platformCandidates) {
+    if (fs.existsSync(candidate)) {
+      return path.join(candidate, "toto-dental-data");
+    }
+  }
+
+  return path.join(__dirname, "data");
+}
+
+function createSupabaseClient() {
+  if (!process.env.SUPABASE_URL) return null;
+
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+    || process.env.SUPABASE_ANON_KEY;
+
+  if (!supabaseKey) {
+    throw new Error("SUPABASE_URL is set but no SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY was provided.");
+  }
+
+  // Lazy-load so local SQLite development does not require the package.
+  const { createClient } = require("@supabase/supabase-js");
+  return createClient(process.env.SUPABASE_URL, supabaseKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  });
+}
+
 const SQLITE_DB_PATH = process.env.SQLITE_DB_PATH
   ? path.resolve(process.env.SQLITE_DB_PATH)
   : "";
 
-const DATA_DIR = SQLITE_DB_PATH
-  ? path.dirname(SQLITE_DB_PATH)
-  : process.env.DATA_DIR
-    ? path.resolve(process.env.DATA_DIR)
-    : process.env.RAILWAY_VOLUME_MOUNT_PATH
-      ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "toto-dental-data")
-      : process.env.RENDER_DISK_PATH
-        ? path.join(process.env.RENDER_DISK_PATH, "toto-dental-data")
-      : process.env.VOLUME_MOUNT_PATH
-        ? path.join(process.env.VOLUME_MOUNT_PATH, "toto-dental-data")
-        : path.join(__dirname, "data");
+const DATA_DIR = SQLITE_DB_PATH ? path.dirname(SQLITE_DB_PATH) : resolvePersistentDataDir();
 
 const DB_PATH = SQLITE_DB_PATH || path.join(DATA_DIR, "app.db");
 const SLOT_SEED_VERSION = "2";
@@ -95,6 +126,15 @@ function getSeedSlots(doctorId) {
 }
 
 function initDatabase() {
+  const supabase = createSupabaseClient();
+  if (supabase) {
+    return {
+      type: "supabase",
+      client: supabase,
+      path: null
+    };
+  }
+
   fs.mkdirSync(DATA_DIR, { recursive: true });
 
   const db = new Database(DB_PATH);
@@ -221,10 +261,15 @@ function initDatabase() {
 
   syncSeedData();
 
-  return db;
+  return {
+    type: "sqlite",
+    client: db,
+    path: DB_PATH
+  };
 }
 
 module.exports = {
   initDatabase,
-  DB_PATH
+  DB_PATH,
+  DATA_DIR
 };

@@ -117,6 +117,7 @@ async function initBooking() {
   const slotCalendar = document.querySelector("#slot-calendar");
   const patientForm = document.querySelector("#patient-form");
   const formResponse = document.querySelector("#form-response");
+  const submitButton = patientForm?.querySelector('button[type="submit"]');
 
   if (
     !doctorSelect ||
@@ -142,6 +143,31 @@ async function initBooking() {
     "";
 
   const getFilteredDoctors = () => doctors.filter((doctor) => doctor.branch === activeBranch);
+
+  const syncFormAvailability = (doctor) => {
+    const isBusy = doctor?.availability === "busy";
+    const dateInput = patientForm.querySelector('input[name="date"]');
+    const timeInput = patientForm.querySelector('input[name="time"]');
+
+    dateInput.disabled = isBusy;
+    timeInput.disabled = isBusy;
+    if (submitButton) {
+      submitButton.disabled = isBusy;
+    }
+
+    if (isBusy) {
+      dateInput.value = "";
+      timeInput.value = "";
+      formResponse.hidden = false;
+      formResponse.textContent = "Reception энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул онлайн хүсэлт түр хаагдсан байна.";
+      return;
+    }
+
+    if (formResponse.textContent.includes("онлайн хүсэлт түр хаагдсан")) {
+      formResponse.hidden = true;
+      formResponse.textContent = "";
+    }
+  };
 
   const renderOptions = () => {
     const filteredDoctors = getFilteredDoctors();
@@ -209,8 +235,7 @@ async function initBooking() {
     `;
 
     if (doctor.availability === "busy") {
-      patientForm.querySelector('input[name="date"]').value = "";
-      patientForm.querySelector('input[name="time"]').value = "";
+      syncFormAvailability(doctor);
       slotCalendar.innerHTML = `
         <article class="slot-day">
           <div class="slot-head">
@@ -218,12 +243,14 @@ async function initBooking() {
             <span>${availabilityLabels[doctor.availability]}</span>
           </div>
           <div class="slot-times">
-            <span class="slot-empty">Ð­Ð½Ñ ÑÐ¼Ñ‡Ð¸Ð¹Ð³ reception Ó©Ð½Ó©Ó©Ð´Ó©Ñ€ Ð·Ð°Ð²Ð³Ò¯Ð¹ Ð³ÑÐ¶ Ñ‚ÑÐ¼Ð´ÑÐ³Ð»ÑÑÑÐ½ Ñ‚ÑƒÐ» Ñ†Ð°Ð³ ÑÐ¾Ð½Ð³Ð¾Ñ…Ð³Ò¯Ð¹.</span>
+            <span class="slot-empty">Reception энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул цаг сонгохгүй.</span>
           </div>
         </article>
       `;
       return;
     }
+
+    syncFormAvailability(doctor);
 
     slotCalendar.innerHTML = doctor.slots
       .map(
@@ -317,7 +344,7 @@ async function initBooking() {
 
     try {
       if (selectedDoctorData?.availability === "busy") {
-        throw new Error("Ð¡Ð¾Ð½Ð³Ð¾ÑÐ¾Ð½ ÑÐ¼Ñ‡ Ó©Ð½Ó©Ó©Ð´Ó©Ñ€ Ð·Ð°Ð²Ð³Ò¯Ð¹ Ð±Ð°Ð¹Ð½Ð°. Ó¨Ó©Ñ€ ÑÐ¼Ñ‡ ÑÑÐ²ÑÐ» Ó©Ó©Ñ€ Ó©Ð´Ó©Ñ€ ÑÐ¾Ð½Ð³Ð¾Ð½Ð¾ ÑƒÑƒ.");
+        throw new Error("Сонгосон эмч өнөөдөр завгүй байна. Өөр эмч эсвэл өөр өдөр сонгоно уу.");
       }
 
       await requestJson("/public/requests", {

@@ -5,10 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node -c server.js"
+    "test": "node -c server.js && node scripts/smoke-test.js"
   },
   "type": "commonjs",
   "dependencies": {
+    "@supabase/supabase-js": "^2.56.0",
     "better-sqlite3": "^12.8.0",
     "express": "^5.2.1"
   }

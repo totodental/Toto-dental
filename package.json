@@ -5,6 +5,6 @@
   "description": "Root deployment helpers for Toto Dental",
   "scripts": {
     "build": "node frontend/scripts/generate-config.js",
-    "test": "node -c backend/server.js"
+    "test": "node -c backend/server.js && node backend/scripts/smoke-test.js && node frontend/scripts/generate-config.js"
   }
 }

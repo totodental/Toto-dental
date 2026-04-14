@@ -52,33 +52,37 @@ function createAuthHelpers(config, sessionModel) {
     res.setHeader("Set-Cookie", `${config.sessionCookie}=; Path=/; HttpOnly; Max-Age=0; ${sameSite}`);
   }
 
-  function requireAdmin(req, res, next) {
-    const cookies = parseCookies(req);
-    const token = cookies[config.sessionCookie];
-    if (!token) {
-      next(createError(401, "Нэвтрэх шаардлагатай."));
-      return;
+  async function requireAdmin(req, res, next) {
+    try {
+      const cookies = parseCookies(req);
+      const token = cookies[config.sessionCookie];
+      if (!token) {
+        next(createError(401, "Нэвтрэх шаардлагатай."));
+        return;
+      }
+
+      const signature = signValue(token);
+      const session = await sessionModel.findValid(token, signature);
+
+      if (!session) {
+        clearSessionCookie(res);
+        next(createError(401, "Нэвтрэх шаардлагатай."));
+        return;
+      }
+
+      const age = Date.now() - new Date(session.created_at).getTime();
+      if (Number.isNaN(age) || age > config.sessionMaxAgeMs) {
+        await sessionModel.deleteByToken(token);
+        clearSessionCookie(res);
+        next(createError(401, "Session хугацаа дууссан байна."));
+        return;
+      }
+
+      req.adminSession = { token };
+      next();
+    } catch (error) {
+      next(error);
     }
-
-    const signature = signValue(token);
-    const session = sessionModel.findValid(token, signature);
-
-    if (!session) {
-      clearSessionCookie(res);
-      next(createError(401, "Нэвтрэх шаардлагатай."));
-      return;
-    }
-
-    const age = Date.now() - new Date(session.created_at).getTime();
-    if (Number.isNaN(age) || age > config.sessionMaxAgeMs) {
-      sessionModel.deleteByToken(token);
-      clearSessionCookie(res);
-      next(createError(401, "Session хугацаа дууссан байна."));
-      return;
-    }
-
-    req.adminSession = { token };
-    next();
   }
 
   return {
