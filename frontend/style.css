@@ -850,7 +850,14 @@ a {
   border-radius: 999px;
   font-family: var(--font-display);
   font-weight: 700;
+  border: 1px solid transparent;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.slot-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 18px rgba(11, 74, 120, 0.12);
 }
 
 .slot-btn.available {
@@ -874,6 +881,18 @@ a {
   background: rgba(191, 53, 53, 0.12);
   color: #8a2f2f;
   cursor: not-allowed;
+}
+
+.slot-btn.is-selected {
+  border-color: rgba(11, 74, 120, 0.22);
+  box-shadow: 0 0 0 3px rgba(11, 142, 207, 0.16), 0 14px 28px rgba(11, 74, 120, 0.14);
+  transform: translateY(-1px);
+}
+
+.slot-btn.is-selected.available,
+.slot-btn.is-selected.limited {
+  background: linear-gradient(135deg, rgba(11, 142, 207, 0.18), rgba(11, 74, 120, 0.14));
+  color: var(--brand-deep);
 }
 
 .patient-form label,
@@ -919,6 +938,69 @@ a {
   border-radius: 18px;
   background: rgba(11, 142, 207, 0.08);
   color: var(--brand-deep);
+}
+
+.success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(12, 31, 47, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.success-modal[hidden] {
+  display: none;
+}
+
+.success-card {
+  width: min(100%, 420px);
+  padding: 28px 26px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(11, 74, 120, 0.08);
+  box-shadow: 0 30px 70px rgba(12, 47, 73, 0.22);
+  text-align: center;
+}
+
+.success-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: rgba(28, 148, 94, 0.12);
+  color: #1c945e;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.success-title {
+  margin: 0;
+  color: #1c945e;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  letter-spacing: 0.02em;
+}
+
+.success-copy {
+  margin: 12px 0 22px;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.success-copy strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.booking-panel.is-submitting {
+  opacity: 0.78;
 }
 
 .doctor-grid,

@@ -81,6 +81,18 @@ const availabilityLabels = {
   busy: "Өнөөдөр завгүй"
 };
 
+function showMessage(container, message) {
+  if (!container) return;
+  container.hidden = false;
+  container.textContent = message;
+}
+
+function clearMessage(container) {
+  if (!container) return;
+  container.hidden = true;
+  container.textContent = "";
+}
+
 async function requestJson(url, options = {}) {
   const finalUrl = url.startsWith("http") ? url : `${API_BASE}${url}`;
 
@@ -118,6 +130,9 @@ async function initBooking() {
   const patientForm = document.querySelector("#patient-form");
   const formResponse = document.querySelector("#form-response");
   const submitButton = patientForm?.querySelector('button[type="submit"]');
+  const bookingPanel = document.querySelector(".booking-panel");
+  const successModal = document.querySelector("#success-modal");
+  const successModalClose = document.querySelector("#success-modal-close");
 
   if (
     !doctorSelect ||
@@ -135,7 +150,9 @@ async function initBooking() {
   let doctors = [];
   let activeBranch = "Салбар 1";
   let activeDoctorId = "";
+  let selectedSlotKey = "";
 
+  const getSelectedSlotKey = (date, time) => `${date}|${time}`;
   const getFilteredDoctors = () => doctors.filter((doctor) => doctor.branch === activeBranch);
   const getDoctorById = (doctorId) => doctors.find((doctor) => doctor.id === doctorId);
   const getCurrentDoctor = () => {
@@ -146,6 +163,18 @@ async function initBooking() {
   const clearSelectedTime = () => {
     patientForm.querySelector('input[name="date"]').value = "";
     patientForm.querySelector('input[name="time"]').value = "";
+    selectedSlotKey = "";
+  };
+
+  const showSuccessModal = () => {
+    if (!successModal) return;
+    successModal.hidden = false;
+    successModalClose?.focus();
+  };
+
+  const hideSuccessModal = () => {
+    if (!successModal) return;
+    successModal.hidden = true;
   };
 
   const isSelectedSlotAvailable = () => {
@@ -176,14 +205,12 @@ async function initBooking() {
 
     if (isBusy) {
       clearSelectedTime();
-      formResponse.hidden = false;
-      formResponse.textContent = "Reception энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул онлайн хүсэлт түр хаагдсан байна.";
+      showMessage(formResponse, "Reception энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул онлайн хүсэлт түр хаагдсан байна.");
       return;
     }
 
     if (formResponse.textContent.includes("онлайн хүсэлт түр хаагдсан")) {
-      formResponse.hidden = true;
-      formResponse.textContent = "";
+      clearMessage(formResponse);
     }
   };
 
@@ -279,10 +306,16 @@ async function initBooking() {
             </div>
             <div class="slot-times">
               ${slot.times
-                .map(
-                  (time) => `
+                .map((time) => {
+                  const slotKey = getSelectedSlotKey(slot.date, time.value);
+                  const classes = ["slot-btn", time.state];
+                  if (selectedSlotKey === slotKey && !time.isBooked) {
+                    classes.push("is-selected");
+                  }
+
+                  return `
                     <button
-                      class="slot-btn ${time.state}"
+                      class="${classes.join(" ")}"
                       type="button"
                       data-doctor="${doctor.id}"
                       data-date="${slot.date}"
@@ -292,8 +325,8 @@ async function initBooking() {
                     >
                       ${time.value}${time.isBooked ? " · Захиалагдсан" : ""}
                     </button>
-                  `
-                )
+                  `;
+                })
                 .join("")}
             </div>
           </article>
@@ -312,8 +345,8 @@ async function initBooking() {
     if (isSelectedSlotAvailable()) return;
 
     clearSelectedTime();
-    formResponse.hidden = false;
-    formResponse.textContent = "Сонгосон цаг энэ хооронд захиалагдсан эсвэл эмчийн төлөв өөрчлөгдсөн тул өөр цаг сонгоно уу.";
+    renderScheduler();
+    showMessage(formResponse, "Сонгосон цаг энэ хооронд захиалагдсан эсвэл эмчийн төлөв өөрчлөгдсөн тул өөр цаг сонгоно уу.");
   };
 
   const renderAll = () => {
@@ -345,8 +378,7 @@ async function initBooking() {
     renderAll();
 
     if (!preserveAutoMessage && formResponse.textContent.includes("Сонгосон цаг")) {
-      formResponse.hidden = true;
-      formResponse.textContent = "";
+      clearMessage(formResponse);
     }
   };
 
@@ -395,10 +427,11 @@ async function initBooking() {
     doctorPicker.value = activeDoctorId;
     patientForm.querySelector('input[name="date"]').value = target.dataset.date || "";
     patientForm.querySelector('input[name="time"]').value = target.dataset.time || "";
+    selectedSlotKey = getSelectedSlotKey(target.dataset.date || "", target.dataset.time || "");
     renderDoctors();
     renderScheduler();
-    formResponse.hidden = false;
-    formResponse.textContent = `Сонгосон цаг: ${target.dataset.date} ${target.dataset.time}. Одоо нэр, утсаа оруулаад хүсэлтээ илгээнэ үү.`;
+    showMessage(formResponse, `Сонгосон цаг: ${target.dataset.date} ${target.dataset.time}. Одоо нэр, утсаа оруулаад хүсэлтээ илгээнэ үү.`);
+    patientForm.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
   patientForm.addEventListener("submit", async (event) => {
@@ -407,6 +440,8 @@ async function initBooking() {
     const selectedDoctorData = getDoctorById(formData.get("doctorId"));
 
     try {
+      bookingPanel?.classList.add("is-submitting");
+
       if (selectedDoctorData?.availability === "busy") {
         throw new Error("Сонгосон эмч өнөөдөр завгүй байна. Өөр эмч эсвэл өөр өдөр сонгоно уу.");
       }
@@ -425,16 +460,30 @@ async function initBooking() {
       });
 
       patientForm.reset();
+      selectedSlotKey = "";
       branchPicker.value = activeBranch;
       branchSelect.value = activeBranch;
       doctorSelect.value = activeDoctorId;
       doctorPicker.value = activeDoctorId;
+      clearMessage(formResponse);
       await refreshBookingData({ preserveAutoMessage: false });
-      formResponse.hidden = false;
-      formResponse.textContent = "Цагийн хүсэлт амжилттай илгээгдлээ. Reception шалгаад баталгаажуулна.";
+      showSuccessModal();
     } catch (error) {
-      formResponse.hidden = false;
-      formResponse.textContent = error.message;
+      showMessage(formResponse, error.message);
+    } finally {
+      bookingPanel?.classList.remove("is-submitting");
+    }
+  });
+
+  successModalClose?.addEventListener("click", hideSuccessModal);
+  successModal?.addEventListener("click", (event) => {
+    if (event.target === successModal) {
+      hideSuccessModal();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      hideSuccessModal();
     }
   });
 
@@ -442,8 +491,7 @@ async function initBooking() {
     try {
       await refreshBookingData();
     } catch (error) {
-      formResponse.hidden = false;
-      formResponse.textContent = error.message;
+      showMessage(formResponse, error.message);
     }
   };
 
@@ -459,8 +507,7 @@ async function initBooking() {
 initBooking().catch((error) => {
   const formResponse = document.querySelector("#form-response");
   if (formResponse) {
-    formResponse.hidden = false;
-    formResponse.textContent = error.message;
+    showMessage(formResponse, error.message);
   }
 });
 
