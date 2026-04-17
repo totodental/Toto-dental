@@ -672,6 +672,97 @@ a {
   padding: 22px;
 }
 
+.pricing-panel {
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(240, 248, 253, 0.96)),
+    radial-gradient(circle at top right, rgba(11, 142, 207, 0.12), transparent 34%);
+}
+
+.pricing-intro {
+  margin: 18px 0 0;
+  max-width: 78ch;
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
+}
+
+.price-card {
+  padding: 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(11, 74, 120, 0.1);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 16px 38px rgba(12, 63, 97, 0.08);
+}
+
+.price-card h4 {
+  margin: 0 0 14px;
+  color: var(--brand-deep);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.price-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.price-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  padding: 12px 0;
+  border-bottom: 1px dashed rgba(11, 74, 120, 0.12);
+}
+
+.price-list li:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.price-list span {
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.price-list strong {
+  flex: 0 0 auto;
+  color: var(--brand-deep);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pricing-note {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(11, 142, 207, 0.1), rgba(244, 189, 86, 0.12));
+  border: 1px solid rgba(11, 74, 120, 0.08);
+}
+
+.pricing-note strong {
+  color: var(--brand-deep);
+  font-family: var(--font-display);
+}
+
+.pricing-note span {
+  color: var(--muted);
+  line-height: 1.75;
+}
+
 .panel-head,
 .queue-head,
 .request-actions,
@@ -1325,6 +1416,7 @@ a {
   .booking-list,
   .doctor-grid,
   .status-controls,
+  .pricing-grid,
   .slot-calendar {
     grid-template-columns: 1fr;
   }
@@ -1338,6 +1430,16 @@ a {
 
   .selected-card {
     flex-direction: column;
+  }
+
+  .price-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .price-list strong {
+    text-align: left;
+    white-space: normal;
   }
 
   .hero h1 {
