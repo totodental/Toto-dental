@@ -1025,7 +1025,7 @@ textarea:focus-visible {
 
 .dot.available { background: #1c945e; }
 .dot.limited { background: #d39616; }
-.dot.booked { background: #9b4de0; }
+.dot.booked { background: #8ca1b5; }
 .dot.busy { background: #bf3535; }
 
 .selected-card {
@@ -1117,15 +1117,25 @@ textarea:focus-visible {
 }
 
 .slot-btn.booked {
-  background: rgba(155, 77, 224, 0.14);
-  color: #6c35a0;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(140, 161, 181, 0.18) 0,
+    rgba(140, 161, 181, 0.18) 8px,
+    rgba(140, 161, 181, 0.28) 8px,
+    rgba(140, 161, 181, 0.28) 16px
+  );
+  color: #536a80;
+  border-color: rgba(83, 106, 128, 0.14);
   cursor: not-allowed;
 }
 
-.slot-btn.busy,
-.slot-btn:disabled {
+.slot-btn.busy {
   background: rgba(191, 53, 53, 0.12);
   color: #8a2f2f;
+  cursor: not-allowed;
+}
+
+.slot-btn:disabled {
   cursor: not-allowed;
 }
 

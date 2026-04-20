@@ -344,9 +344,9 @@ async function initBooking() {
                       data-date="${slot.date}"
                       data-time="${time.value}"
                       ${time.isBooked ? "disabled" : ""}
-                      title="${time.isBooked ? "Энэ цаг аль хэдийн захиалагдсан." : "Энэ цагийг сонгоно."}"
+                      title="${time.isBooked ? "Энэ цаг боломжгүй." : "Энэ цагийг сонгоно."}"
                     >
-                      ${time.value}${time.isBooked ? " · Захиалагдсан" : ""}
+                      ${time.value}
                     </button>
                   `;
                 })
@@ -369,7 +369,7 @@ async function initBooking() {
 
     clearSelectedTime();
     renderScheduler();
-    showMessage(formResponse, "Сонгосон цаг энэ хооронд захиалагдсан эсвэл эмчийн төлөв өөрчлөгдсөн тул өөр цаг сонгоно уу.");
+    showMessage(formResponse, "Сонгосон цаг энэ хооронд боломжгүй болсон эсвэл эмчийн төлөв өөрчлөгдсөн тул өөр цаг сонгоно уу.");
   };
 
   const renderAll = () => {
