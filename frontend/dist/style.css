@@ -52,6 +52,23 @@ a {
   text-decoration: none;
 }
 
+button,
+select,
+input,
+textarea,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus-visible,
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(11, 142, 207, 0.28);
+  outline-offset: 3px;
+}
+
 .topbar {
   position: sticky;
   top: 0;
@@ -518,6 +535,34 @@ a {
   line-height: 1.75;
 }
 
+.service-cta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+  padding: 22px 24px;
+  border: 1px solid rgba(11, 74, 120, 0.08);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 18px 42px rgba(17, 74, 120, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.service-cta strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--brand-deep);
+  font-family: var(--font-display);
+  font-size: 1.12rem;
+}
+
+.service-cta span {
+  display: block;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
 .feature {
   display: grid;
   grid-template-columns: 0.95fr 1.05fr;
@@ -647,6 +692,8 @@ a {
 
 .booking-layout {
   display: block;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
 .booking-panel,
@@ -686,11 +733,57 @@ a {
   line-height: 1.8;
 }
 
-.pricing-grid {
+.price-selector-shell {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 22px;
+  grid-template-columns: minmax(260px, 1fr) minmax(220px, 0.45fr);
+  gap: 14px;
+  align-items: end;
+  margin-top: 20px;
+}
+
+.price-selector {
+  display: grid;
+  gap: 8px;
+  color: var(--brand-deep);
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.price-selector select {
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid rgba(11, 74, 120, 0.12);
+  border-radius: 20px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  box-shadow: 0 14px 30px rgba(12, 63, 97, 0.08);
+}
+
+.price-highlight {
+  display: grid;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: rgba(244, 189, 86, 0.16);
+  border: 1px solid rgba(244, 189, 86, 0.24);
+}
+
+.price-highlight span {
+  color: #8a5a00;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.price-highlight strong {
+  color: var(--brand-deep);
+  font-family: var(--font-display);
+}
+
+.price-groups {
+  margin-top: 16px;
 }
 
 .price-card {
@@ -699,6 +792,14 @@ a {
   border: 1px solid rgba(11, 74, 120, 0.1);
   background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 16px 38px rgba(12, 63, 97, 0.08);
+}
+
+.price-group {
+  animation: price-card-in 0.28s ease both;
+}
+
+.price-group[hidden] {
+  display: none;
 }
 
 .price-card h4 {
@@ -761,6 +862,38 @@ a {
 .pricing-note span {
   color: var(--muted);
   line-height: 1.75;
+}
+
+.booking-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.booking-steps span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(11, 74, 120, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.68);
+  color: var(--muted);
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+
+.booking-steps strong {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), var(--brand-deep));
+  color: #fff;
+  font-size: 0.86rem;
 }
 
 .panel-head,
@@ -1015,6 +1148,18 @@ a {
   background: rgba(255, 255, 255, 0.86);
   color: var(--text);
   font: inherit;
+  transition: border-color 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
+}
+
+.patient-form input:focus,
+.patient-form select:focus,
+.patient-form textarea:focus,
+.pin-form input:focus,
+.scheduler-picker select:focus,
+.price-selector select:focus {
+  border-color: rgba(11, 142, 207, 0.45);
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(11, 142, 207, 0.12);
 }
 
 .submit-btn {
@@ -1330,6 +1475,17 @@ a {
   }
 }
 
+@keyframes price-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 1440px) {
   .hero,
   .feature,
@@ -1416,7 +1572,8 @@ a {
   .booking-list,
   .doctor-grid,
   .status-controls,
-  .pricing-grid,
+  .price-selector-shell,
+  .booking-steps,
   .slot-calendar {
     grid-template-columns: 1fr;
   }
@@ -1430,6 +1587,11 @@ a {
 
   .selected-card {
     flex-direction: column;
+  }
+
+  .service-cta {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .price-list li {

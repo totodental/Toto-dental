@@ -93,6 +93,25 @@ function clearMessage(container) {
   container.textContent = "";
 }
 
+function initPriceSelector() {
+  const categorySelect = document.querySelector("#price-category");
+  const groups = Array.from(document.querySelectorAll("[data-price-group]"));
+  if (!categorySelect || !groups.length) return;
+
+  const showGroup = (activeValue) => {
+    groups.forEach((group) => {
+      const isActive = group.dataset.priceGroup === activeValue;
+      group.hidden = !isActive;
+      group.classList.toggle("is-active", isActive);
+    });
+  };
+
+  showGroup(categorySelect.value);
+  categorySelect.addEventListener("change", (event) => {
+    showGroup(event.target.value);
+  });
+}
+
 async function requestJson(url, options = {}) {
   const finalUrl = url.startsWith("http") ? url : `${API_BASE}${url}`;
 
@@ -517,3 +536,4 @@ initBooking().catch((error) => {
 });
 
 initNavHighlight();
+initPriceSelector();
