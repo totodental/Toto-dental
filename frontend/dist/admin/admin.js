@@ -102,7 +102,7 @@ async function initAdmin() {
     selectedDay = date || "";
     if (!date) {
       dayDetailTitle.textContent = "Өдөр сонгоогүй байна";
-      dayDetailList.innerHTML = '<div class="empty-box">Календарь дээрх өдөр эсвэл `+N өөр` дээр дарж тухайн өдрийн бүх захиалгыг харна.</div>';
+      dayDetailList.innerHTML = '<div class="empty-box">Календарь дээрх өдөр эсвэл “+N өөр” товч дээр дарж тухайн өдрийн бүх захиалгыг харна.</div>';
       return;
     }
 
@@ -176,7 +176,7 @@ async function initAdmin() {
     editorTime.value = "";
     editorStatus.value = statusValue;
     editorNotes.value = "";
-    editorFeedback.textContent = "Шинэ цаг үүсгэх эсвэл календарь дээрх event дээр дарж засварлана.";
+    editorFeedback.textContent = "Шинэ цаг үүсгэх эсвэл календарь дээрх захиалга дээр дарж засварлана.";
   };
 
   const loadEditor = (appointment) => {
@@ -468,7 +468,7 @@ async function initAdmin() {
         selectedAppointmentId = response.appointment?.id || "";
         editorAppointmentId.value = selectedAppointmentId;
       }
-      editorFeedback.textContent = "Цаг confirmed боллоо.";
+      editorFeedback.textContent = "Цаг баталгаажлаа.";
       await loadDashboard();
     } catch (error) {
       editorFeedback.textContent = error.message;
@@ -585,7 +585,7 @@ async function initAdmin() {
       const selectedDate = day.dataset.date || "";
       resetEditor(selectedDate);
       renderDayDetails(selectedDate);
-      editorFeedback.textContent = `${selectedDate} өдрийн захиалгуудыг доорх "Өдрийн дэлгэрэнгүй" хэсгээс харна.`;
+      editorFeedback.textContent = `${selectedDate} өдрийн захиалгуудыг доорх “Өдрийн дэлгэрэнгүй” хэсгээс харна.`;
     }
   });
 
@@ -685,6 +685,6 @@ initAdmin().catch((error) => {
   if (workspace) workspace.hidden = true;
   if (loginPanel) loginPanel.hidden = false;
   if (loginFeedback) {
-    loginFeedback.textContent = error.message || "Admin panel ачаалахад алдаа гарлаа.";
+    loginFeedback.textContent = error.message || "Админ самбар ачаалахад алдаа гарлаа.";
   }
 });

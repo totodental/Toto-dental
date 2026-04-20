@@ -34,6 +34,7 @@ body {
   font-family: var(--font-body);
   color: var(--text);
   font-weight: 400;
+  line-height: 1.5;
   letter-spacing: 0.01em;
   background:
     radial-gradient(circle at top left, rgba(11, 142, 207, 0.16), transparent 28%),
@@ -346,6 +347,9 @@ textarea:focus-visible {
 .section {
   padding-top: 72px;
   padding-bottom: 20px;
+  max-width: 1500px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .section-heading {
@@ -508,6 +512,18 @@ textarea:focus-visible {
   position: relative;
   padding: 28px;
   min-height: 260px;
+}
+
+.service-card::after,
+.price-card::after,
+.doctor-highlight-card::after {
+  content: "";
+  display: block;
+  width: 42px;
+  height: 3px;
+  margin-top: 18px;
+  border-radius: 999px;
+  background: rgba(11, 142, 207, 0.18);
 }
 
 .service-no {
@@ -1341,6 +1357,10 @@ textarea:focus-visible {
   color: white;
 }
 
+.contact-card.primary .big-call {
+  line-height: 1;
+}
+
 .contact-card.primary .eyebrow,
 .contact-card.primary .schedule {
   color: rgba(255, 255, 255, 0.8);
@@ -1632,6 +1652,10 @@ textarea:focus-visible {
 
   .section-heading {
     padding: 20px 18px;
+  }
+
+  .section {
+    padding-top: 52px;
   }
 
   .footer {

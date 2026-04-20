@@ -228,7 +228,7 @@ async function initBooking() {
 
     if (isBusy) {
       clearSelectedTime();
-      showMessage(formResponse, "Reception энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул онлайн хүсэлт түр хаагдсан байна.");
+      showMessage(formResponse, "Ресепшн энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул онлайн хүсэлт түр хаагдсан байна.");
       return;
     }
 
@@ -310,7 +310,7 @@ async function initBooking() {
             <span>${availabilityLabels[doctor.availability]}</span>
           </div>
           <div class="slot-times">
-            <span class="slot-empty">Reception энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул цаг сонгохгүй.</span>
+          <span class="slot-empty">Ресепшн энэ эмчийг өнөөдөр завгүй гэж тэмдэглэсэн тул цаг сонгох боломжгүй.</span>
           </div>
         </article>
       `;

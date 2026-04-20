@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests">
-  <title>Toto Dental Admin</title>
+  <title>Toto Dental | Админ самбар</title>
   <link rel="icon" type="image/jpeg" href="/assets/logo.jpg">
   <link rel="stylesheet" href="/style.css">
   <link rel="stylesheet" href="/admin/admin.css">
@@ -16,7 +16,7 @@
         <img src="/assets/logo.jpg" alt="Toto Dental">
         <div>
           <p class="panel-kicker">Нууц хандалт</p>
-          <h1>Toto Dental Reception</h1>
+          <h1>Toto Dental админ самбар</h1>
         </div>
       </div>
 
@@ -24,7 +24,7 @@
         <div class="panel-head">
           <div>
             <p class="panel-kicker">Админ нэвтрэх</p>
-            <h3>Reception нэвтрэх хэсэг</h3>
+            <h3>Ресепшн нэвтрэх хэсэг</h3>
           </div>
           <span class="panel-chip accent">Зөвхөн ажилтанд</span>
         </div>
@@ -39,7 +39,7 @@
           </label>
           <button class="primary-btn submit-btn" type="submit">Нэвтрэх</button>
         </form>
-        <div class="admin-feedback" id="login-feedback">Зөв нууц линкээр нэвтэрсэн үед login хэсэг нээгдэнэ.</div>
+          <div class="admin-feedback" id="login-feedback">Зөв нууц линкээр орсон үед нэвтрэх хэсэг идэвхжинэ.</div>
       </div>
 
       <div class="admin-panel denied-panel" id="denied-panel" hidden>
@@ -52,10 +52,16 @@
         <section class="admin-panel admin-overview">
           <div class="panel-head">
             <div>
-              <p class="panel-kicker">Reception хяналт</p>
+              <p class="panel-kicker">Ресепшн хяналт</p>
               <h3>Цагийн хүсэлт ба хуваарь</h3>
             </div>
             <button class="ghost-btn" id="admin-logout" type="button">Гарах</button>
+          </div>
+
+          <div class="admin-helper">
+            <span>Календарь дээрх захиалгыг дарж засна.</span>
+            <span>Захиалгыг өөр өдөр рүү чирж шилжүүлж болно.</span>
+            <span>Эмч завгүй бол хэрэглэгчийн талд цаг сонгох боломж хаагдана.</span>
           </div>
 
           <div class="dashboard-stats">
@@ -107,7 +113,7 @@
                 </div>
               </div>
               <div class="day-detail-list" id="day-detail-list">
-                <div class="empty-box">Календарь дээрх өдөр эсвэл `+N өөр` товч дээр дарж тухайн өдрийн бүх захиалгыг харна.</div>
+                <div class="empty-box">Календарь дээрх өдөр эсвэл “+N өөр” товч дээр дарж тухайн өдрийн бүх захиалгыг харна.</div>
               </div>
             </div>
           </section>
@@ -116,11 +122,11 @@
             <div class="queue-head">
               <div>
                 <h4>Ирсэн хүсэлтүүд</h4>
-                <p class="admin-subtle">Засах бол карт дээрх “Өөрчлөх” товчийг, дэлгэрэнгүй харах бол календарь дээрх event-ийг ашиглана.</p>
+                <p class="admin-subtle">Засах бол карт дээрх “Өөрчлөх” товчийг, дэлгэрэнгүй харах бол календарь дээрх захиалгыг дарна.</p>
               </div>
               <div class="calendar-actions">
                 <button class="ghost-btn" id="admin-create-appointment" type="button">Шинэ цаг</button>
-                <button class="ghost-btn" id="clear-requests" type="button">Хүсэлт цэвэрлэх</button>
+                <button class="ghost-btn" id="clear-requests" type="button">Бүгдийг түүхлэх</button>
               </div>
             </div>
             <div class="request-list" id="request-list"></div>
@@ -129,7 +135,7 @@
           <section class="admin-panel editor-panel">
             <div class="queue-head">
               <div>
-                <h4>Цагийн workspace</h4>
+                <h4>Цагийн ажлын хэсэг</h4>
                 <p class="admin-subtle">Шинээр нэмэх, засах, баталгаажуулах, эсвэл календарь дээрээс чирж өдөр солих боломжтой.</p>
               </div>
               <div class="calendar-actions">
@@ -185,7 +191,7 @@
                 <button class="ghost-btn" id="editor-delete" type="button">Түүхэнд хадгалах</button>
               </div>
             </form>
-            <div class="admin-feedback" id="editor-feedback">Календарь дээрх захиалгыг чирж өөр өдөр рүү зөөж болно. Цагийн өөрчлөлтийг энэ хэсгээс удирдана.</div>
+            <div class="admin-feedback" id="editor-feedback">Календарь дээрх захиалгыг дарж засах эсвэл чирж өөр өдөр рүү зөөж болно.</div>
           </section>
 
           <section class="admin-panel">
