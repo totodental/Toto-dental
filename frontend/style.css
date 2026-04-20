@@ -692,11 +692,13 @@ textarea:focus-visible {
 .gallery {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  grid-column: 1 / -1;
+  gap: 22px;
+  margin-top: 8px;
 }
 
 .gallery-card {
-  min-height: 520px;
+  min-height: 620px;
 }
 
 .contact {
