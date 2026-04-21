@@ -96,6 +96,7 @@ function clearMessage(container) {
 function initPriceSelector() {
   const categorySelect = document.querySelector("#price-category");
   const groups = Array.from(document.querySelectorAll("[data-price-group]"));
+  const scrollButton = document.querySelector("[data-scroll-target]");
   if (!categorySelect || !groups.length) return;
 
   const showGroup = (activeValue) => {
@@ -109,6 +110,11 @@ function initPriceSelector() {
   showGroup(categorySelect.value);
   categorySelect.addEventListener("change", (event) => {
     showGroup(event.target.value);
+  });
+
+  scrollButton?.addEventListener("click", () => {
+    const target = document.querySelector(scrollButton.dataset.scrollTarget || "");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 }
 

@@ -369,6 +369,18 @@ textarea:focus-visible {
   font-size: clamp(2rem, 4vw, 3.4rem);
 }
 
+.booking-heading {
+  max-width: 540px;
+  margin-bottom: 14px;
+  padding: 18px 22px;
+  border-radius: 24px;
+}
+
+.booking-heading h2 {
+  font-size: clamp(1.8rem, 3vw, 2.85rem);
+  line-height: 1.12;
+}
+
 .service-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -864,7 +876,9 @@ textarea:focus-visible {
 
 .pricing-note {
   display: grid;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 16px;
+  align-items: center;
   margin-top: 18px;
   padding: 18px 20px;
   border-radius: 22px;
@@ -880,6 +894,19 @@ textarea:focus-visible {
 .pricing-note span {
   color: var(--muted);
   line-height: 1.75;
+}
+
+.pricing-note strong,
+.pricing-note span {
+  grid-column: 1;
+}
+
+.price-scroll-btn {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
 }
 
 .booking-steps {
@@ -1634,6 +1661,17 @@ textarea:focus-visible {
   .price-list strong {
     text-align: left;
     white-space: normal;
+  }
+
+  .pricing-note {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-note strong,
+  .pricing-note span,
+  .price-scroll-btn {
+    grid-column: auto;
+    grid-row: auto;
   }
 
   .hero h1 {

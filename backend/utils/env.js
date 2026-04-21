@@ -86,6 +86,8 @@ function getConfig() {
     (process.env.FRONTEND_ORIGINS ||
       [
         "https://toto-dental.vercel.app",
+        "https://totodental.mn",
+        "https://www.totodental.mn",
         "http://127.0.0.1:3000",
         "http://localhost:3000",
         "http://127.0.0.1:5173",
