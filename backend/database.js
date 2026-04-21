@@ -136,20 +136,40 @@ async function runSupabaseQuery(queryPromise) {
 }
 
 async function syncSupabaseSeedData(supabase) {
-  await runSupabaseQuery(
-    supabase.from("doctors").upsert(
-      seedDoctors.map((doctor) => ({
-        id: doctor.id,
-        name: doctor.name,
-        role: doctor.role,
-        branch: doctor.branch,
-        hours: doctor.hours,
-        availability: doctor.availability,
-        note: doctor.note
-      })),
-      { onConflict: "id" }
-    )
-  );
+  for (const doctor of seedDoctors) {
+    const existingDoctors = await runSupabaseQuery(
+      supabase.from("doctors")
+        .select("id")
+        .eq("id", doctor.id)
+        .limit(1)
+    );
+
+    if (existingDoctors.length > 0) {
+      await runSupabaseQuery(
+        supabase.from("doctors")
+          .update({
+            name: doctor.name,
+            role: doctor.role,
+            branch: doctor.branch,
+            hours: doctor.hours,
+            note: doctor.note
+          })
+          .eq("id", doctor.id)
+      );
+    } else {
+      await runSupabaseQuery(
+        supabase.from("doctors").insert({
+          id: doctor.id,
+          name: doctor.name,
+          role: doctor.role,
+          branch: doctor.branch,
+          hours: doctor.hours,
+          availability: doctor.availability,
+          note: doctor.note
+        })
+      );
+    }
+  }
 
   for (const doctor of seedDoctors) {
     const existingSlots = await runSupabaseQuery(
@@ -255,7 +275,6 @@ async function initDatabase() {
       role = excluded.role,
       branch = excluded.branch,
       hours = excluded.hours,
-      availability = excluded.availability,
       note = excluded.note
   `);
 

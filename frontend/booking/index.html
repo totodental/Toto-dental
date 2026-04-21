@@ -119,7 +119,7 @@
             <div class="pricing-note">
               <strong>Танд тохирох эмчилгээний төлөвлөгөөг баталгаажуулахын тулд цаг авч үзлэгт орно уу.</strong>
               <span>Онлайнаар хүсэлт илгээвэл ресепшн таны сонгосон үйлчилгээ, хугацаа, төлбөрийн талаар эргэн холбогдоно.</span>
-              <button class="secondary-btn price-scroll-btn" type="button" data-scroll-target="#time-selection">Цагаа сонгох</button>
+              <button class="price-scroll-btn" type="button" data-scroll-target="#time-selection" aria-label="Цаг сонгох хэсэг рүү очих">↓</button>
             </div>
           </section>
           <section class="booking-panel patient-panel" id="time-selection">
@@ -158,7 +158,7 @@
               <div class="selected-doctor" id="selected-doctor"></div>
               <div class="slot-calendar" id="slot-calendar"></div>
             </div>
-            <form class="patient-form" id="patient-form">
+            <form class="patient-form" id="patient-form" hidden>
               <label>
                 Нэр
                 <input type="text" name="patientName" placeholder="Өөрийн нэрээ оруулна уу" required>

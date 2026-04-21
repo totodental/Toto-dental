@@ -196,11 +196,16 @@ async function initBooking() {
     return filteredDoctors.find((doctor) => doctor.id === activeDoctorId) || filteredDoctors[0] || null;
   };
 
+  const syncFormReveal = () => {
+    patientForm.hidden = !selectedSlotKey;
+  };
+
   const clearSelectedTime = () => {
     patientForm.querySelector('input[name="date"]').value = "";
     patientForm.querySelector('input[name="time"]').value = "";
     timeDisplay.value = "";
     selectedSlotKey = "";
+    syncFormReveal();
   };
 
   const showSuccessModal = () => {
@@ -392,6 +397,7 @@ async function initBooking() {
     renderDoctors();
     renderScheduler();
     syncSelectionFeedback();
+    syncFormReveal();
   };
 
   const refreshBookingData = async ({ preserveAutoMessage = true } = {}) => {
@@ -467,6 +473,7 @@ async function initBooking() {
     patientForm.querySelector('input[name="time"]').value = target.dataset.time || "";
     timeDisplay.value = target.dataset.time || "";
     selectedSlotKey = getSelectedSlotKey(target.dataset.date || "", target.dataset.time || "");
+    syncFormReveal();
     renderDoctors();
     renderScheduler();
     showMessage(formResponse, `Сонгосон цаг: ${target.dataset.date} ${target.dataset.time}. Одоо нэр, утсаа оруулаад хүсэлтээ илгээнэ үү.`);
@@ -500,6 +507,7 @@ async function initBooking() {
 
       patientForm.reset();
       selectedSlotKey = "";
+      syncFormReveal();
       branchPicker.value = activeBranch;
       branchSelect.value = activeBranch;
       doctorSelect.value = activeDoctorId;

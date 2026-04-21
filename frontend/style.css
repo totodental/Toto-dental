@@ -370,10 +370,7 @@ textarea:focus-visible {
 }
 
 .booking-heading {
-  max-width: 540px;
-  margin-bottom: 14px;
-  padding: 18px 22px;
-  border-radius: 24px;
+  display: none;
 }
 
 .booking-heading h2 {
@@ -723,7 +720,7 @@ textarea:focus-visible {
 .booking-layout {
   display: block;
   max-width: 1180px;
-  margin: 0 auto;
+  margin: -18px auto 0;
 }
 
 .booking-panel,
@@ -746,7 +743,7 @@ textarea:focus-visible {
 }
 
 .booking-panel {
-  padding: 22px;
+  padding: 20px;
 }
 
 .pricing-panel {
@@ -757,18 +754,18 @@ textarea:focus-visible {
 }
 
 .pricing-intro {
-  margin: 18px 0 0;
-  max-width: 78ch;
+  margin: 10px 0 0;
+  max-width: 62ch;
   color: var(--muted);
-  line-height: 1.8;
+  line-height: 1.65;
 }
 
 .price-selector-shell {
   display: grid;
   grid-template-columns: minmax(260px, 1fr) minmax(220px, 0.45fr);
-  gap: 14px;
+  gap: 12px;
   align-items: end;
-  margin-top: 20px;
+  margin-top: 14px;
 }
 
 .price-selector {
@@ -781,7 +778,7 @@ textarea:focus-visible {
 
 .price-selector select {
   width: 100%;
-  padding: 16px 18px;
+  padding: 14px 16px;
   border: 1px solid rgba(11, 74, 120, 0.12);
   border-radius: 20px;
   background: #fff;
@@ -793,7 +790,7 @@ textarea:focus-visible {
 .price-highlight {
   display: grid;
   gap: 4px;
-  padding: 16px 18px;
+  padding: 14px 16px;
   border-radius: 20px;
   background: rgba(244, 189, 86, 0.16);
   border: 1px solid rgba(244, 189, 86, 0.24);
@@ -813,11 +810,11 @@ textarea:focus-visible {
 }
 
 .price-groups {
-  margin-top: 16px;
+  margin-top: 14px;
 }
 
 .price-card {
-  padding: 20px;
+  padding: 18px 20px;
   border-radius: 24px;
   border: 1px solid rgba(11, 74, 120, 0.1);
   background: rgba(255, 255, 255, 0.84);
@@ -833,7 +830,7 @@ textarea:focus-visible {
 }
 
 .price-card h4 {
-  margin: 0 0 14px;
+  margin: 0 0 10px;
   color: var(--brand-deep);
   font-family: var(--font-display);
   font-size: 1.2rem;
@@ -851,7 +848,7 @@ textarea:focus-visible {
   justify-content: space-between;
   gap: 16px;
   align-items: baseline;
-  padding: 12px 0;
+  padding: 10px 0;
   border-bottom: 1px dashed rgba(11, 74, 120, 0.12);
 }
 
@@ -877,11 +874,11 @@ textarea:focus-visible {
 .pricing-note {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px 16px;
+  gap: 4px 14px;
   align-items: center;
-  margin-top: 18px;
-  padding: 18px 20px;
-  border-radius: 22px;
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 20px;
   background: linear-gradient(135deg, rgba(11, 142, 207, 0.1), rgba(244, 189, 86, 0.12));
   border: 1px solid rgba(11, 74, 120, 0.08);
 }
@@ -893,7 +890,8 @@ textarea:focus-visible {
 
 .pricing-note span {
   color: var(--muted);
-  line-height: 1.75;
+  line-height: 1.55;
+  font-size: 0.94rem;
 }
 
 .pricing-note strong,
@@ -904,9 +902,24 @@ textarea:focus-visible {
 .price-scroll-btn {
   grid-column: 2;
   grid-row: 1 / span 2;
-  white-space: nowrap;
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
   cursor: pointer;
   border: none;
+  background: #e8f4f8;
+  color: var(--brand-deep);
+  font-size: 1.25rem;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(12, 63, 97, 0.08);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.price-scroll-btn:hover {
+  transform: translateY(2px);
+  background: #d8edf5;
 }
 
 .booking-steps {
