@@ -54,7 +54,7 @@ const SQLITE_DB_PATH = process.env.SQLITE_DB_PATH
 const DATA_DIR = SQLITE_DB_PATH ? path.dirname(SQLITE_DB_PATH) : resolvePersistentDataDir();
 
 const DB_PATH = SQLITE_DB_PATH || path.join(DATA_DIR, "app.db");
-const SLOT_SEED_VERSION = "2";
+const SLOT_SEED_VERSION = "3";
 
 const seedDoctors = [
   {
@@ -62,6 +62,15 @@ const seedDoctors = [
     name: "Б.Наранцэнгэл",
     role: "Анагаах ухааны докторант, Нүүр амны гажиг заслын их эмч",
     branch: "Салбар 1",
+    hours: "Даваа-Баасан · 10:00-18:00",
+    availability: "available",
+    note: "Гажиг заслын оношилгоо, аппаратын хяналт, урт хугацааны эмчилгээний төлөвлөгөөг боловсруулан ажиллана."
+  },
+  {
+    id: "narantsengel-branch2",
+    name: "Б.Наранцэнгэл",
+    role: "Анагаах ухааны докторант, Нүүр амны гажиг заслын их эмч",
+    branch: "Салбар 2",
     hours: "Даваа-Баасан · 10:00-18:00",
     availability: "available",
     note: "Гажиг заслын оношилгоо, аппаратын хяналт, урт хугацааны эмчилгээний төлөвлөгөөг боловсруулан ажиллана."
@@ -123,7 +132,7 @@ function generateSlots(days = 3, startHour = 8, endHour = 18) {
 }
 
 function getSeedSlots(doctorId) {
-  if (doctorId === "narantsengel") return generateSlots(5, 10, 19);
+  if (doctorId === "narantsengel" || doctorId === "narantsengel-branch2") return generateSlots(5, 10, 19);
   if (doctorId === "lkhagvadorj") return generateSlots(4, 10, 19);
   if (doctorId === "mandakhnaran") return generateSlots(6, 11, 19);
   return generateSlots(3, 10, 18);

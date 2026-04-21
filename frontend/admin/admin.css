@@ -110,6 +110,20 @@
   gap: 18px;
 }
 
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 2px 4px;
+}
+
+.admin-toolbar h2 {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.45rem);
+}
+
 .admin-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
@@ -118,6 +132,10 @@
 
 .calendar-panel {
   grid-column: 1 / -1;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 248, 253, 0.92)),
+    radial-gradient(circle at 92% 8%, rgba(11, 142, 207, 0.14), transparent 28%);
 }
 
 .editor-panel {
@@ -133,6 +151,10 @@
 
 .admin-calendar {
   margin-top: 18px;
+  padding: 16px;
+  border: 1px solid rgba(11, 74, 120, 0.08);
+  border-radius: 26px;
+  background: rgba(246, 251, 254, 0.72);
 }
 
 .day-detail-panel {
@@ -245,18 +267,29 @@
 }
 
 .calendar-grid {
-  background: rgba(255, 255, 255, 0.04);
-  padding: 10px;
+  background: transparent;
+  padding: 0;
   border-radius: 24px;
 }
 
 .calendar-day {
-  min-height: 138px;
+  min-height: 126px;
   padding: 12px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.88);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid rgba(11, 74, 120, 0.08);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 10px 24px rgba(11, 74, 120, 0.045);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.calendar-day:hover {
+  border-color: rgba(11, 142, 207, 0.24);
+  box-shadow: 0 16px 34px rgba(11, 74, 120, 0.1);
+  transform: translateY(-2px);
+}
+
+.calendar-day.has-events {
+  background: linear-gradient(180deg, #ffffff 0%, #f7fbfd 100%);
 }
 
 .calendar-day.is-other-month {
@@ -283,6 +316,31 @@
   font-family: var(--font-display);
 }
 
+.calendar-date strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(11, 142, 207, 0.08);
+}
+
+.calendar-day.is-today .calendar-date strong {
+  background: var(--brand);
+  color: #fff;
+}
+
+.calendar-date span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(11, 74, 120, 0.07);
+  color: var(--muted);
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
 .calendar-events {
   display: grid;
   gap: 8px;
@@ -290,12 +348,13 @@
 }
 
 .calendar-event {
-  padding: 10px 12px;
+  padding: 9px 11px;
   border-radius: 16px;
   background: rgba(11, 142, 207, 0.1);
   color: var(--brand-deep);
   cursor: grab;
   border: 1px solid transparent;
+  box-shadow: 0 8px 18px rgba(11, 74, 120, 0.06);
 }
 
 .calendar-event.confirmed {
@@ -327,6 +386,8 @@
   display: block;
   margin-top: 4px;
   font-size: 0.82rem;
+  color: inherit;
+  opacity: 0.78;
 }
 
 .calendar-more {
@@ -439,8 +500,19 @@
 
 .status-card strong {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   font-family: var(--font-display);
+}
+
+.status-branch {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 10px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(11, 142, 207, 0.08);
+  color: var(--brand-deep);
+  font-weight: 800;
 }
 
 .status-summary {
@@ -499,6 +571,11 @@
 }
 
 @media (max-width: 900px) {
+  .admin-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .admin-login-form,
   .admin-editor-form,
   .admin-grid,

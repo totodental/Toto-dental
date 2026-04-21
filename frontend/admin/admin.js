@@ -61,9 +61,6 @@ async function initAdmin() {
   const logoutBtn = document.querySelector("#admin-logout");
   const requestList = document.querySelector("#request-list");
   const statusControls = document.querySelector("#status-controls");
-  const pendingCount = document.querySelector("#pending-count");
-  const confirmedCount = document.querySelector("#confirmed-count");
-  const busyCount = document.querySelector("#busy-count");
   const clearRequests = document.querySelector("#clear-requests");
   const createAppointmentBtn = document.querySelector("#admin-create-appointment");
   const calendarTitle = document.querySelector("#calendar-title");
@@ -233,14 +230,6 @@ async function initAdmin() {
       return b.id.localeCompare(a.id);
     });
 
-    const pending = requests.filter((request) => request.status === "pending");
-    const confirmed = requests.filter((request) => request.status === "confirmed");
-    const busy = doctors.filter((doctor) => doctor.availability === "busy");
-
-    pendingCount.textContent = pending.length;
-    confirmedCount.textContent = confirmed.length;
-    busyCount.textContent = busy.length;
-
     requestList.innerHTML = sortedRequests.length
       ? sortedRequests
           .map((request) => {
@@ -279,6 +268,7 @@ async function initAdmin() {
         (doctor) => `
           <article class="status-card">
             <strong>${escapeHtml(doctor.name)}</strong>
+            <small class="status-branch">${escapeHtml(doctor.branch)}</small>
             <span class="status-summary status-${doctor.availability}">${availabilityLabels[doctor.availability]}</span>
             <div class="status-buttons">
               <button class="ghost-btn ${doctor.availability === "available" ? "is-active active-available" : ""}" type="button" data-status="available" data-doctor="${escapeHtml(doctor.id)}">Завтай</button>
@@ -321,13 +311,14 @@ async function initAdmin() {
           .sort((a, b) => a.time.localeCompare(b.time));
         const visibleRequests = dayRequests.slice(0, 2);
         const hiddenCount = Math.max(dayRequests.length - visibleRequests.length, 0);
+        const hasEvents = dayRequests.length > 0;
         const isToday =
           date.getFullYear() === today.getFullYear() &&
           date.getMonth() === today.getMonth() &&
           date.getDate() === today.getDate();
 
         return `
-          <div class="calendar-day ${isOtherMonth ? "is-other-month" : ""} ${isToday ? "is-today" : ""}" data-date="${iso}">
+          <div class="calendar-day ${isOtherMonth ? "is-other-month" : ""} ${isToday ? "is-today" : ""} ${hasEvents ? "has-events" : ""}" data-date="${iso}">
             <div class="calendar-date">
               <strong>${date.getDate()}</strong>
               <span>${dayRequests.length ? `${dayRequests.length} зах.` : ""}</span>
@@ -358,7 +349,7 @@ async function initAdmin() {
                         : ""
                     }
                   `
-                  : '<span class="slot-empty">Захиалга алга</span>'
+                  : ""
               }
             </div>
           </div>
