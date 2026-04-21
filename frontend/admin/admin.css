@@ -159,32 +159,6 @@
   background: rgba(246, 251, 254, 0.72);
 }
 
-.admin-filterbar {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(160px, 1fr));
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.admin-filterbar label {
-  display: grid;
-  gap: 6px;
-  color: var(--brand-deep);
-  font-size: 0.8rem;
-  font-weight: 800;
-}
-
-.admin-filterbar select {
-  width: 100%;
-  padding: 11px 14px;
-  border: 1px solid rgba(11, 74, 120, 0.12);
-  border-radius: 16px;
-  background: #fff;
-  color: var(--text);
-  font: inherit;
-  font-weight: 700;
-}
-
 .day-detail-panel {
   margin-top: 18px;
   padding: 18px;
@@ -653,7 +627,6 @@
   .admin-grid,
   .dashboard-stats,
   .admin-helper,
-  .admin-filterbar,
   .calendar-weekdays,
   .calendar-grid {
     grid-template-columns: 1fr;
