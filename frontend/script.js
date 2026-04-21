@@ -1,5 +1,14 @@
 const API_BASE = (window.__APP_CONFIG__?.API_BASE || "/api").replace(/\/+$/, "");
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 const observer = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
@@ -250,7 +259,7 @@ async function initBooking() {
     }
 
     const options = filteredDoctors
-      .map((doctor) => `<option value="${doctor.id}">${doctor.name}</option>`)
+      .map((doctor) => `<option value="${escapeHtml(doctor.id)}">${escapeHtml(doctor.name)}</option>`)
       .join("");
 
     doctorSelect.innerHTML = options;
@@ -269,14 +278,14 @@ async function initBooking() {
         (doctor) => `
           <article class="doctor-status-card doctor-${doctor.availability}">
             <div class="doctor-top">
-              <span class="doctor-branch">${doctor.branch}</span>
+              <span class="doctor-branch">${escapeHtml(doctor.branch)}</span>
               <span class="doctor-status">${availabilityLabels[doctor.availability]}</span>
             </div>
-            <h3>${doctor.name}</h3>
-            <p class="doctor-role">${doctor.role}</p>
+            <h3>${escapeHtml(doctor.name)}</h3>
+            <p class="doctor-role">${escapeHtml(doctor.role)}</p>
             <ul class="doctor-meta">
-              <li><strong>Хуваарь:</strong> ${doctor.hours}</li>
-              <li><strong>Тэмдэглэл:</strong> ${doctor.note}</li>
+              <li><strong>Хуваарь:</strong> ${escapeHtml(doctor.hours)}</li>
+              <li><strong>Тэмдэглэл:</strong> ${escapeHtml(doctor.note)}</li>
             </ul>
           </article>
         `
@@ -296,13 +305,13 @@ async function initBooking() {
       <article class="selected-card selected-${doctor.availability}">
         <div>
           <p class="panel-kicker">Сонгогдсон эмч</p>
-          <h4>${doctor.name}</h4>
-          <p>${doctor.role}</p>
+          <h4>${escapeHtml(doctor.name)}</h4>
+          <p>${escapeHtml(doctor.role)}</p>
         </div>
         <div class="selected-meta">
-          <span>${doctor.branch}</span>
+          <span>${escapeHtml(doctor.branch)}</span>
           <span>${availabilityLabels[doctor.availability]}</span>
-          <span>${doctor.hours}</span>
+          <span>${escapeHtml(doctor.hours)}</span>
         </div>
       </article>
     `;
@@ -312,7 +321,7 @@ async function initBooking() {
       slotCalendar.innerHTML = `
         <article class="slot-day">
           <div class="slot-head">
-            <strong>${doctor.name}</strong>
+            <strong>${escapeHtml(doctor.name)}</strong>
             <span>${availabilityLabels[doctor.availability]}</span>
           </div>
           <div class="slot-times">
@@ -330,8 +339,8 @@ async function initBooking() {
         (slot) => `
           <article class="slot-day">
             <div class="slot-head">
-              <strong>${slot.label}</strong>
-              <span>${slot.date}</span>
+              <strong>${escapeHtml(slot.label)}</strong>
+              <span>${escapeHtml(slot.date)}</span>
             </div>
             <div class="slot-times">
               ${slot.times
@@ -346,13 +355,13 @@ async function initBooking() {
                     <button
                       class="${classes.join(" ")}"
                       type="button"
-                      data-doctor="${doctor.id}"
-                      data-date="${slot.date}"
-                      data-time="${time.value}"
+                      data-doctor="${escapeHtml(doctor.id)}"
+                      data-date="${escapeHtml(slot.date)}"
+                      data-time="${escapeHtml(time.value)}"
                       ${time.isBooked ? "disabled" : ""}
                       title="${time.isBooked ? "Энэ цаг боломжгүй." : "Энэ цагийг сонгоно."}"
                     >
-                      ${time.value}
+                      ${escapeHtml(time.value)}
                     </button>
                   `;
                 })

@@ -25,6 +25,10 @@ function resolvePersistentDataDir() {
 function createSupabaseClient() {
   if (!process.env.SUPABASE_URL) return null;
 
+  if (process.env.NODE_ENV === "production" && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("Production Supabase mode requires SUPABASE_SERVICE_ROLE_KEY on the backend service.");
+  }
+
   const supabaseKey =
     process.env.SUPABASE_SERVICE_ROLE_KEY
     || process.env.SUPABASE_ANON_KEY;

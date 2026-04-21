@@ -33,7 +33,7 @@ function createAuthHelpers(config, sessionModel) {
 
   function setSessionCookie(res, token) {
     const isProduction = process.env.NODE_ENV === "production";
-    const sameSite = isProduction ? "SameSite=None" : "SameSite=Lax";
+    const sameSite = "SameSite=Lax";
     const cookieParts = [
       `${config.sessionCookie}=${encodeURIComponent(token)}`,
       "Path=/",
@@ -48,8 +48,15 @@ function createAuthHelpers(config, sessionModel) {
 
   function clearSessionCookie(res) {
     const isProduction = process.env.NODE_ENV === "production";
-    const sameSite = isProduction ? "SameSite=None; Secure" : "SameSite=Lax";
-    res.setHeader("Set-Cookie", `${config.sessionCookie}=; Path=/; HttpOnly; Max-Age=0; ${sameSite}`);
+    const cookieParts = [
+      `${config.sessionCookie}=`,
+      "Path=/",
+      "HttpOnly",
+      "Max-Age=0",
+      isProduction ? "Secure" : "",
+      "SameSite=Lax"
+    ].filter(Boolean);
+    res.setHeader("Set-Cookie", cookieParts.join("; "));
   }
 
   async function requireAdmin(req, res, next) {

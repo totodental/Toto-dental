@@ -1,5 +1,14 @@
 const API_BASE = (window.__APP_CONFIG__?.API_BASE || "/api").replace(/\/+$/, "");
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function formatLocalDate(date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -117,14 +126,14 @@ async function initAdmin() {
           .map((item) => {
             const doctor = doctors.find((doctorItem) => doctorItem.id === item.doctorId);
             return `
-              <article class="day-detail-item ${item.status} ${item.id === selectedAppointmentId ? "is-selected" : ""}" data-appointment-id="${item.id}">
+              <article class="day-detail-item ${item.status} ${item.id === selectedAppointmentId ? "is-selected" : ""}" data-appointment-id="${escapeHtml(item.id)}">
                 <div class="day-detail-primary">
-                  <strong>${item.time}</strong>
-                  <span>${doctor ? doctor.name : item.doctorId}</span>
+                  <strong>${escapeHtml(item.time)}</strong>
+                  <span>${escapeHtml(doctor ? doctor.name : item.doctorId)}</span>
                 </div>
                 <div class="day-detail-secondary">
-                  <strong>${item.patientName}</strong>
-                  <span>${item.phone}</span>
+                  <strong>${escapeHtml(item.patientName)}</strong>
+                  <span>${escapeHtml(item.phone)}</span>
                 </div>
                 <span class="request-badge">${getStatusLabel(item.status)}</span>
               </article>
@@ -141,7 +150,7 @@ async function initAdmin() {
     const branchDoctors = getDoctorsByBranch(selectedBranch);
 
     editorDoctor.innerHTML = branchDoctors
-      .map((doctor) => `<option value="${doctor.id}">${doctor.name}</option>`)
+      .map((doctor) => `<option value="${escapeHtml(doctor.id)}">${escapeHtml(doctor.name)}</option>`)
       .join("");
 
     if (preferredDoctorId && branchDoctors.some((doctor) => doctor.id === preferredDoctorId)) {
@@ -241,21 +250,21 @@ async function initAdmin() {
               <article class="request-card request-${request.status} ${selectedClass}">
                 <div class="queue-head">
                   <div>
-                    <strong>${request.patientName}</strong>
-                    <p>${doctor ? doctor.name : request.doctorId} · ${request.branch}</p>
+                    <strong>${escapeHtml(request.patientName)}</strong>
+                    <p>${escapeHtml(doctor ? doctor.name : request.doctorId)} · ${escapeHtml(request.branch)}</p>
                   </div>
                   <span class="request-badge">${getStatusLabel(request.status)}</span>
                 </div>
                 <div class="request-meta">
-                  <span>${request.date} · ${request.time}</span>
-                  <span>${request.phone}</span>
+                  <span>${escapeHtml(request.date)} · ${escapeHtml(request.time)}</span>
+                  <span>${escapeHtml(request.phone)}</span>
                 </div>
-                <p>${request.notes || "Нэмэлт тайлбаргүй"}</p>
+                <p>${escapeHtml(request.notes || "Нэмэлт тайлбаргүй")}</p>
                 <div class="request-actions">
-                  <button class="ghost-btn" type="button" data-action="confirm" data-id="${request.id}">Батлах</button>
-                  <button class="ghost-btn" type="button" data-action="edit" data-id="${request.id}">Өөрчлөх</button>
-                  <button class="ghost-btn" type="button" data-action="reject" data-id="${request.id}">Цуцлах</button>
-                  <button class="ghost-btn" type="button" data-action="delete" data-id="${request.id}">Түүхлэх</button>
+                  <button class="ghost-btn" type="button" data-action="confirm" data-id="${escapeHtml(request.id)}">Батлах</button>
+                  <button class="ghost-btn" type="button" data-action="edit" data-id="${escapeHtml(request.id)}">Өөрчлөх</button>
+                  <button class="ghost-btn" type="button" data-action="reject" data-id="${escapeHtml(request.id)}">Цуцлах</button>
+                  <button class="ghost-btn" type="button" data-action="delete" data-id="${escapeHtml(request.id)}">Түүхлэх</button>
                 </div>
               </article>
             `;
@@ -269,12 +278,12 @@ async function initAdmin() {
       .map(
         (doctor) => `
           <article class="status-card">
-            <strong>${doctor.name}</strong>
+            <strong>${escapeHtml(doctor.name)}</strong>
             <span class="status-summary status-${doctor.availability}">${availabilityLabels[doctor.availability]}</span>
             <div class="status-buttons">
-              <button class="ghost-btn ${doctor.availability === "available" ? "is-active active-available" : ""}" type="button" data-status="available" data-doctor="${doctor.id}">Завтай</button>
-              <button class="ghost-btn ${doctor.availability === "limited" ? "is-active active-limited" : ""}" type="button" data-status="limited" data-doctor="${doctor.id}">Хязгаартай</button>
-              <button class="ghost-btn ${doctor.availability === "busy" ? "is-active active-busy" : ""}" type="button" data-status="busy" data-doctor="${doctor.id}">Завгүй</button>
+              <button class="ghost-btn ${doctor.availability === "available" ? "is-active active-available" : ""}" type="button" data-status="available" data-doctor="${escapeHtml(doctor.id)}">Завтай</button>
+              <button class="ghost-btn ${doctor.availability === "limited" ? "is-active active-limited" : ""}" type="button" data-status="limited" data-doctor="${escapeHtml(doctor.id)}">Хязгаартай</button>
+              <button class="ghost-btn ${doctor.availability === "busy" ? "is-active active-busy" : ""}" type="button" data-status="busy" data-doctor="${escapeHtml(doctor.id)}">Завгүй</button>
             </div>
           </article>
         `
@@ -333,12 +342,12 @@ async function initAdmin() {
                         return `
                           <article
                             class="calendar-event ${request.status} ${request.id === selectedAppointmentId ? "is-selected" : ""}"
-                            data-appointment-id="${request.id}"
+                            data-appointment-id="${escapeHtml(request.id)}"
                             draggable="true"
                             title="Чирээд өөр өдөр рүү зөөнө"
                           >
-                            <strong>${request.time} · ${doctor ? doctor.name : request.doctorId}</strong>
-                            <span>${request.patientName}</span>
+                            <strong>${escapeHtml(request.time)} · ${escapeHtml(doctor ? doctor.name : request.doctorId)}</strong>
+                            <span>${escapeHtml(request.patientName)}</span>
                           </article>
                         `;
                       })

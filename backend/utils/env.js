@@ -37,11 +37,7 @@ function ensureProductionReady(config) {
 
   if (missing.length) {
     const message = `Production configuration is incomplete. Set secure values for: ${missing.join(", ")}`;
-    if (process.env.STRICT_PRODUCTION_CONFIG === "true") {
-      throw new Error(message);
-    }
-
-    console.warn(`[config-warning] ${message}`);
+    throw new Error(message);
   }
 }
 

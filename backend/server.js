@@ -77,6 +77,7 @@ async function startServer() {
     res.setHeader("X-Frame-Options", "DENY");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+    res.setHeader("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
 
     if (req.method === "OPTIONS") {
       return res.sendStatus(204);
@@ -100,7 +101,9 @@ async function startServer() {
   app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     res.status(statusCode).json({
-      error: err.message || "Server error"
+      error: statusCode >= 500 && process.env.NODE_ENV === "production"
+        ? "Server error"
+        : err.message || "Server error"
     });
   });
 

@@ -37,7 +37,7 @@ SESSION_SECRET=change-this-secret
 ADMIN_ROUTE_ID=your-private-admin-route
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=strong-password
-FRONTEND_ORIGINS=https://toto-dental.vercel.app
+FRONTEND_ORIGINS=https://toto-dental.vercel.app,https://totodental.mn,https://www.totodental.mn
 RAILWAY_VOLUME_MOUNT_PATH=/data
 ```
 
@@ -45,9 +45,9 @@ Production note:
 
 - `FRONTEND_ORIGINS` should contain only frontend URLs you control.
 - Wildcard Vercel preview origins are not trusted by default.
-- In production, the API logs a warning unless `SESSION_SECRET`, `ADMIN_ROUTE_ID`, `ADMIN_USERNAME`, and either `ADMIN_PASSWORD` or `ADMIN_PASSWORD_HASH` are set to non-default secure values.
-- If you want the deployment to fail hard until all secure values are configured, set `STRICT_PRODUCTION_CONFIG=true`.
+- In production, the API will fail to start unless `SESSION_SECRET`, `ADMIN_ROUTE_ID`, `ADMIN_USERNAME`, and either `ADMIN_PASSWORD` or `ADMIN_PASSWORD_HASH` are set to non-default secure values.
 - If you prefer not to store a plain admin password in hosting settings, set `ADMIN_PASSWORD_HASH` instead.
+- Keep `SUPABASE_SERVICE_ROLE_KEY` only in Railway/backend variables. Never add it to Vercel/frontend variables.
 
 To keep appointments and reception calendar data after redeploy/restart, attach a Railway volume. The backend stores SQLite under:
 
@@ -93,7 +93,6 @@ Future Supabase variables:
 
 ```bash
 SUPABASE_URL=https://awnizykbxxhvqfooxuvy.supabase.co
-SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 SUPABASE_DB_URL=
 ```
@@ -137,6 +136,7 @@ If you already have production data in SQLite, export these tables and import th
 
 - Backend deploy has persistent volume attached and `RAILWAY_VOLUME_MOUNT_PATH` configured.
 - Production secrets are set with non-default values.
-- `FRONTEND_ORIGINS` contains `https://toto-dental.vercel.app`.
+- `FRONTEND_ORIGINS` contains `https://toto-dental.vercel.app`, `https://totodental.mn`, and `https://www.totodental.mn`.
 - Vercel rewrites `/api/*` to `https://toto-dental-production-3d62.up.railway.app/api/*`.
 - Frontend is rebuilt so `frontend/dist/` matches the latest source before final deployment.
+- Admin and public pages have CSP/security headers, and user-submitted content is escaped before rendering.
