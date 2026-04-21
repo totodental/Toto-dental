@@ -70,6 +70,9 @@ async function initAdmin() {
   const calendarPrev = document.querySelector("#calendar-prev");
   const calendarToday = document.querySelector("#calendar-today");
   const calendarNext = document.querySelector("#calendar-next");
+  const filterBranch = document.querySelector("#admin-filter-branch");
+  const filterDoctor = document.querySelector("#admin-filter-doctor");
+  const filterStatus = document.querySelector("#admin-filter-status");
   const editorForm = document.querySelector("#appointment-editor-form");
   const editorFeedback = document.querySelector("#editor-feedback");
   const editorReset = document.querySelector("#editor-reset");
@@ -90,6 +93,11 @@ async function initAdmin() {
   let activeMonth = new Date();
   let selectedAppointmentId = "";
   let selectedDay = "";
+  let activeFilters = {
+    branch: "all",
+    doctor: "all",
+    status: "active"
+  };
   activeMonth = new Date(activeMonth.getFullYear(), activeMonth.getMonth(), 1);
 
   loginPanel.hidden = true;
@@ -104,6 +112,51 @@ async function initAdmin() {
     return "Хүлээгдэж буй";
   };
 
+  const readFilters = () => {
+    activeFilters = {
+      branch: filterBranch.value || "all",
+      doctor: filterDoctor.value || "all",
+      status: filterStatus.value || "active"
+    };
+  };
+
+  const getFilteredRequests = () =>
+    requests.filter((request) => {
+      if (activeFilters.branch !== "all" && request.branch !== activeFilters.branch) return false;
+      if (activeFilters.doctor !== "all" && request.doctorId !== activeFilters.doctor) return false;
+      if (activeFilters.status === "active") return !["archived", "cancelled"].includes(request.status);
+      if (activeFilters.status !== "all" && request.status !== activeFilters.status) return false;
+      return true;
+    });
+
+  const renderFilterOptions = () => {
+    const branchOptions = [...new Set(doctors.map((doctor) => doctor.branch))].filter(Boolean);
+    const branchIsValid = activeFilters.branch === "all" || branchOptions.includes(activeFilters.branch);
+    const selectedBranch = branchIsValid ? activeFilters.branch : "all";
+    const visibleDoctors = selectedBranch === "all"
+      ? doctors
+      : doctors.filter((doctor) => doctor.branch === selectedBranch);
+    const doctorIsValid = activeFilters.doctor === "all" || visibleDoctors.some((doctor) => doctor.id === activeFilters.doctor);
+
+    activeFilters.branch = selectedBranch;
+    activeFilters.doctor = doctorIsValid ? activeFilters.doctor : "all";
+
+    filterBranch.innerHTML = `
+      <option value="all">Бүх салбар</option>
+      ${branchOptions.map((branch) => `<option value="${escapeHtml(branch)}">${escapeHtml(branch)}</option>`).join("")}
+    `;
+    filterBranch.value = activeFilters.branch;
+
+    filterDoctor.innerHTML = `
+      <option value="all">Бүх эмч</option>
+      ${visibleDoctors
+        .map((doctor) => `<option value="${escapeHtml(doctor.id)}">${escapeHtml(doctor.name)} · ${escapeHtml(doctor.branch)}</option>`)
+        .join("")}
+    `;
+    filterDoctor.value = activeFilters.doctor;
+    filterStatus.value = activeFilters.status;
+  };
+
   const renderDayDetails = (date) => {
     selectedDay = date || "";
     if (!date) {
@@ -112,7 +165,7 @@ async function initAdmin() {
       return;
     }
 
-    const dayAppointments = requests
+    const dayAppointments = getFilteredRequests()
       .filter((item) => item.date === date)
       .sort((a, b) => a.time.localeCompare(b.time));
 
@@ -132,7 +185,7 @@ async function initAdmin() {
                   <strong>${escapeHtml(item.patientName)}</strong>
                   <span>${escapeHtml(item.phone)}</span>
                 </div>
-                <span class="request-badge">${getStatusLabel(item.status)}</span>
+                <span class="request-badge badge-${escapeHtml(item.status)}">${getStatusLabel(item.status)}</span>
               </article>
             `;
           })
@@ -224,7 +277,7 @@ async function initAdmin() {
   };
 
   const renderRequests = () => {
-    const sortedRequests = [...requests].sort((a, b) => {
+    const sortedRequests = [...getFilteredRequests()].sort((a, b) => {
       const createdDiff = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       if (createdDiff !== 0) return createdDiff;
       return b.id.localeCompare(a.id);
@@ -242,7 +295,7 @@ async function initAdmin() {
                     <strong>${escapeHtml(request.patientName)}</strong>
                     <p>${escapeHtml(doctor ? doctor.name : request.doctorId)} · ${escapeHtml(request.branch)}</p>
                   </div>
-                  <span class="request-badge">${getStatusLabel(request.status)}</span>
+                  <span class="request-badge badge-${escapeHtml(request.status)}">${getStatusLabel(request.status)}</span>
                 </div>
                 <div class="request-meta">
                   <span>${escapeHtml(request.date)} · ${escapeHtml(request.time)}</span>
@@ -306,7 +359,7 @@ async function initAdmin() {
     calendarGrid.innerHTML = cells
       .map(({ date, isOtherMonth }) => {
         const iso = formatLocalDate(date);
-        const dayRequests = requests
+        const dayRequests = getFilteredRequests()
           .filter((request) => request.date === iso)
           .sort((a, b) => a.time.localeCompare(b.time));
         const visibleRequests = dayRequests.slice(0, 2);
@@ -359,6 +412,7 @@ async function initAdmin() {
   };
 
   const renderDashboard = () => {
+    renderFilterOptions();
     renderRequests();
     renderStatusControls();
     renderCalendar();
@@ -672,6 +726,16 @@ async function initAdmin() {
   calendarNext.addEventListener("click", () => {
     activeMonth = new Date(activeMonth.getFullYear(), activeMonth.getMonth() + 1, 1);
     renderCalendar();
+  });
+
+  [filterBranch, filterDoctor, filterStatus].forEach((filter) => {
+    filter.addEventListener("change", () => {
+      readFilters();
+      if (filter === filterBranch) {
+        activeFilters.doctor = "all";
+      }
+      renderDashboard();
+    });
   });
 }
 
